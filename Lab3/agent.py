@@ -49,68 +49,6 @@ class ProblemSolvingAgent:
         logger.info(f'The agent successfully searched a path! ')
         logger.info(f'Agent finishes after {time_controller.get_time_used()}s of computing. ')    
         return path, visited
-    
-    
-    
-    def DFS(self, obstacles, start_pos, goal_pos):
-        def dfs(u):
-            nonlocal path, visited, mv, goal_pos, gmap
-            visited.append(u)
-            gmap[u[0]][u[1]] = True
-            if u  == goal_pos:
-                path.append(u)
-                return True
-            for i in range(8):
-                v = (u[0]+mv[0][i], u[1]+mv[1][i])
-                if (gmap[v[0]][v[1]] == False and dfs(v)):
-                    path.append(u)
-                    return True
-            return False
-        path, visited = [], []
-        mv = [[-1, -1, 0, 1, 1, 1, 0, -1], [0, 1, 1, 1, 0, -1, -1, -1]]
-        obstacles = np.array(obstacles)
-        n, m = np.amax(obstacles[:, 0])+1, np.amax(obstacles[:, 1])+1
-        gmap = [[False for j in range(m)] for i in range(n)]
-        for i in range(len(obstacles)):
-            gmap[obstacles[i][0]][obstacles[i][1]] = True
-        dfs(start_pos)
-        path.reverse()
-        # print(path, visited)
-        return path, visited
-    
-    def BFS(self, obstacles, start_pos, goal_pos):
-        path, visited = [], []
-        mv = [[-1, -1, 0, 1, 1, 1, 0, -1], [0, 1, 1, 1, 0, -1, -1, -1]]
-        obstacles = np.array(obstacles)
-        n, m = np.amax(obstacles[:, 0])+1, np.amax(obstacles[:, 1])+1
-        gmap = [[False for j in range(m)] for i in range(n)]
-        fa = [[(0, 0) for j in range(m)] for i in range(n)]
-        q = queue.Queue()
-        q.put(start_pos)
-        while (True):
-            u = q.get()
-            visited.append(u)
-            gmap[u[0]][u[1]] = True
-            if (u == goal_pos):
-                break
-            for i in range(8):
-                v = (u[0]+mv[0][i], u[1]+mv[1][i])
-                if visited[v[0]][v[1]] == False:
-                    fa[v[0]][v[1]] = u
-                    q.put(v)
-        u = goal_pos
-        while (True):
-            path.append(u)
-            if u == start_pos:
-                break
-            u = fa[u[0]][u[1]]
-        visited.reverse()
-        return path, visited
-    
-    def UCS(self, obstacles, start_pos, goal_pos):
-        path, visited = [], []
-        
-        return path, visited
         
     def neighbours_of(self, obstacles, node):
         """_summary_
@@ -159,3 +97,94 @@ class ProblemSolvingAgent:
     
     def inner_product(self, a, b):
         return sum(x * y for x, y in zip(a, b))
+
+    
+    def DFS(self, obstacles, start_pos, goal_pos):
+        def dfs(u):
+            nonlocal path, visited, mv, goal_pos, gmap
+            visited.append(u)
+            gmap[u[0]][u[1]] = True
+            if u  == goal_pos:
+                path.append(u)
+                return True
+            for i in range(8):
+                v = (u[0]+mv[0][i], u[1]+mv[1][i])
+                if (gmap[v[0]][v[1]] == False and dfs(v)):
+                    path.append(u)
+                    return True
+            return False
+        path, visited = [], []
+        mv = [[-1, -1, 0, 1, 1, 1, 0, -1], [0, 1, 1, 1, 0, -1, -1, -1]]
+        obstacles = np.array(obstacles)
+        n, m = np.amax(obstacles[:, 0])+1, np.amax(obstacles[:, 1])+1
+        gmap = [[False for j in range(m)] for i in range(n)]
+        for i in range(len(obstacles)):
+            gmap[obstacles[i][0]][obstacles[i][1]] = True
+        dfs(start_pos)
+        path.reverse()
+        # print(path, visited)
+        return path, visited
+    
+    def BFS(self, obstacles, start_pos, goal_pos):
+        path, visited = [], []
+        mv = [[-1, -1, 0, 1, 1, 1, 0, -1], [0, 1, 1, 1, 0, -1, -1, -1]]
+        obstacles = np.array(obstacles)
+        n, m = np.amax(obstacles[:, 0])+1, np.amax(obstacles[:, 1])+1
+        gmap = [[False for j in range(m)] for i in range(n)]
+        for i in range(len(obstacles)):
+            gmap[obstacles[i][0]][obstacles[i][1]] = True
+        fa = [[(0, 0) for j in range(m)] for i in range(n)]
+        q = queue.Queue()
+        q.put(start_pos)
+        while (True):
+            u = q.get()
+            visited.append(u)
+            gmap[u[0]][u[1]] = True
+            if (u == goal_pos):
+                break
+            for i in range(8):
+                v = (u[0]+mv[0][i], u[1]+mv[1][i])
+                if gmap[v[0]][v[1]] == False:
+                    fa[v[0]][v[1]] = u
+                    gmap[v[0]][v[1]] = True
+                    q.put(v)
+        u = goal_pos
+        while (True):
+            path.append(u)
+            if u == start_pos:
+                break
+            u = fa[u[0]][u[1]]
+        path.reverse()
+        return path, visited
+    
+    def UCS(self, obstacles, start_pos, goal_pos):
+        path, visited = [], []
+        mv = [[-1, -1, 0, 1, 1, 1, 0, -1], [0, 1, 1, 1, 0, -1, -1, -1]]
+        obstacles = np.array(obstacles)
+        n, m = np.amax(obstacles[:, 0])+1, np.amax(obstacles[:, 1])+1
+        gmap = [[False for j in range(m)] for i in range(n)]
+        for i in range(len(obstacles)):
+            gmap[obstacles[i][0]][obstacles[i][1]] = True
+        fa = [[(0, 0) for j in range(m)] for i in range(n)]
+        q = queue.PriorityQueue()
+        q.put((0, start_pos))
+        while (True):
+            u = q.get()[1]
+            visited.append(u)
+            gmap[u[0]][u[1]] = True
+            if (u == goal_pos):
+                break
+            for i in range(8):
+                v = (u[0]+mv[0][i], u[1]+mv[1][i])
+                if gmap[v[0]][v[1]] == False:
+                    fa[v[0]][v[1]] = u
+                    gmap[v[0]][v[1]] = True
+                    q.put((euclidean_distance(self, start_pos, v), v))
+        u = goal_pos
+        while (True):
+            path.append(u)
+            if u == start_pos:
+                break
+            u = fa[u[0]][u[1]]
+        path.reverse()
+        return path, visited
