@@ -49,55 +49,7 @@ class ProblemSolvingAgent:
         logger.info(f'The agent successfully searched a path! ')
         logger.info(f'Agent finishes after {time_controller.get_time_used()}s of computing. ')    
         return path, visited
-        
-    def neighbours_of(self, obstacles, node):
-        """_summary_
-
-        Args:
-            obstacles (_type_): _description_
-            node (_type_): _description_
-        Returns: iterable generator of tuple(neighbour, moving_cost)
-            neighbour(bi-tuple): a position near to the node. 
-            moving_cost(float): the cost the agent has to pay to move from node to neighbour. 
-        """
-        directions = [[1, 0, 1], [0, 1, 1], [-1, 0, 1], [0, -1, 1],
-                [-1, -1, math.sqrt(2)], [-1, 1, math.sqrt(2)], [1, -1, math.sqrt(2)], [1, 1, math.sqrt(2)] ]
-        return filter(lambda nm: nm[0] not in obstacles 
-            , map(lambda d:((node[0]+d[0], node[1]+d[1]), d[2]), directions))
-        
-    def euclidean_distance(self, node1, node2, coefficient=1):
-        """The Euclidean distance between two nodes.
-        Args:
-            node1 (bi-tuple): a point in 2d grid map. 
-            node2 (bi-tuple): another point in 2d grid map. 
-            coefficient (int, optional): The coefficient for decision. Defaults to 1.
-        Returns:
-            d: the distance value. 
-        """
-        return coefficient*sqrt(sum( (x - y)**2 for x, y in zip(node1, node2)))
-    def parents2path(self, parents, last_node, start_pos):
-        """The function generates the path found by searching algorithm. 
-        Args:
-            parents (dict): given a node in the graph, return the predecessor of the node in the path. 
-                For example, a->b->c is a path found by BFS, then parents should be {c:b, b:a, a:None} .
-            last_node (bi-tuple): in the example, the last_node is c. 
-
-        Returns:
-            path: in the example, the generated path is [a, b, c]. 
-        """
-        path = [last_node]
-        while last_node in parents:
-            predecessor = parents[last_node]
-            path.append(predecessor)
-            last_node = predecessor
-            if last_node == start_pos:
-                break
-        path.reverse()
-        return path
     
-    def inner_product(self, a, b):
-        return sum(x * y for x, y in zip(a, b))
-
     
     def DFS(self, obstacles, start_pos, goal_pos):
         def dfs(u):
@@ -179,7 +131,7 @@ class ProblemSolvingAgent:
                 if gmap[v[0]][v[1]] == False:
                     fa[v[0]][v[1]] = u
                     gmap[v[0]][v[1]] = True
-                    q.put((euclidean_distance(self, start_pos, v), v))
+                    q.put((ProblemSolvingAgent.euclidean_distance(self, start_pos, v), v))
         u = goal_pos
         while (True):
             path.append(u)
@@ -188,3 +140,52 @@ class ProblemSolvingAgent:
             u = fa[u[0]][u[1]]
         path.reverse()
         return path, visited
+        
+    def neighbours_of(self, obstacles, node):
+        """_summary_
+
+        Args:
+            obstacles (_type_): _description_
+            node (_type_): _description_
+        Returns: iterable generator of tuple(neighbour, moving_cost)
+            neighbour(bi-tuple): a position near to the node. 
+            moving_cost(float): the cost the agent has to pay to move from node to neighbour. 
+        """
+        directions = [[1, 0, 1], [0, 1, 1], [-1, 0, 1], [0, -1, 1],
+                [-1, -1, math.sqrt(2)], [-1, 1, math.sqrt(2)], [1, -1, math.sqrt(2)], [1, 1, math.sqrt(2)] ]
+        return filter(lambda nm: nm[0] not in obstacles 
+            , map(lambda d:((node[0]+d[0], node[1]+d[1]), d[2]), directions))
+        
+    def euclidean_distance(self, node1, node2, coefficient=1):
+        """The Euclidean distance between two nodes.
+        Args:
+            node1 (bi-tuple): a point in 2d grid map. 
+            node2 (bi-tuple): another point in 2d grid map. 
+            coefficient (int, optional): The coefficient for decision. Defaults to 1.
+        Returns:
+            d: the distance value. 
+        """
+        return coefficient*sqrt(sum( (x - y)**2 for x, y in zip(node1, node2)))
+    
+    def parents2path(self, parents, last_node, start_pos):
+        """The function generates the path found by searching algorithm. 
+        Args:
+            parents (dict): given a node in the graph, return the predecessor of the node in the path. 
+                For example, a->b->c is a path found by BFS, then parents should be {c:b, b:a, a:None} .
+            last_node (bi-tuple): in the example, the last_node is c. 
+
+        Returns:
+            path: in the example, the generated path is [a, b, c]. 
+        """
+        path = [last_node]
+        while last_node in parents:
+            predecessor = parents[last_node]
+            path.append(predecessor)
+            last_node = predecessor
+            if last_node == start_pos:
+                break
+        path.reverse()
+        return path
+    
+    def inner_product(self, a, b):
+        return sum(x * y for x, y in zip(a, b))
