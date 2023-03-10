@@ -51,10 +51,62 @@ class ProblemSolvingAgent:
     
     def GBFS(self, obstacles, start_pos, goal_pos):
         path, visited = [], []
-        
+        mv = [[-1, -1, 0, 1, 1, 1, 0, -1], [0, 1, 1, 1, 0, -1, -1, -1]]
+        obstacles = np.array(list(obstacles))
+        n, m = np.amax(obstacles[:, 0])+1, np.amax(obstacles[:, 1])+1
+        gmap = [[False for j in range(m)] for i in range(n)]
+        parents = dict()
+        for i in range(len(obstacles)):
+            gmap[obstacles[i][0]][obstacles[i][1]] = True
+        q = queue.PriorityQueue()
+        gmap[start_pos[0]][start_pos[1]] = True
+        q.put((0, start_pos))
+        while (True):
+            u = q.get()[1]
+            visited.append(u)
+            if (u == goal_pos):
+                break
+            for i in range(8):
+                v = (u[0]+mv[0][i], u[1]+mv[1][i])
+                if gmap[v[0]][v[1]] == True:
+                    continue
+                parents[v] = u
+                gmap[v[0]][v[1]] = True
+                q.put((ProblemSolvingAgent.euclidean_distance(self, v, goal_pos), v))
+        path = ProblemSolvingAgent.parents2path(self, parents, goal_pos, start_pos)
         return path, visited
     def Astar(self, obstacles, start_pos, goal_pos):
         path, visited = [], []
+        mv = [[-1, -1, 0, 1, 1, 1, 0, -1], [0, 1, 1, 1, 0, -1, -1, -1]]
+        obstacles = np.array(list(obstacles))
+        n, m = np.amax(obstacles[:, 0])+1, np.amax(obstacles[:, 1])+1
+        gmap = [[False for j in range(m)] for i in range(n)]
+        dist = [[1145141919810 for j in range(m)] for i in range(n)]
+        parents = dict()
+        for i in range(len(obstacles)):
+            gmap[obstacles[i][0]][obstacles[i][1]] = True
+        q = queue.PriorityQueue()
+        dist[start_pos[0]][start_pos[1]] = 0
+        gmap[start_pos[0]][start_pos[1]] = True
+        q.put((0, start_pos))
+        while (not q.empty()):
+            u = q.get()[1]
+            visited.append(u)
+            gmap[u[0]][u[1]] = True
+            if (u == goal_pos):
+                break
+            for i in range(8):
+                v = (u[0]+mv[0][i], u[1]+mv[1][i])
+                d = dist[u[0]][u[1]]+ProblemSolvingAgent.euclidean_distance(self, u, v)
+                if gmap[v[0]][v[1]] == True or d >= dist[v[0]][v[1]]:
+                    continue
+                dist[v[0]][v[1]] = d
+                parents[v] = u
+                q.put((d+ProblemSolvingAgent.euclidean_distance(self, v, goal_pos), v))
+        path = ProblemSolvingAgent.parents2path(self, parents, goal_pos, start_pos)
+        print(path)
+        return path, visited
+        
         
     def DFS(self, obstacles, start_pos, goal_pos):
         path, visited = [], []
