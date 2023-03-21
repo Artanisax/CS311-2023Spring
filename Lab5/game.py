@@ -1,9 +1,7 @@
 # ackowledgement: https://github.com/aimacode/aima-python
 
 from collections import defaultdict
-# import numba as jit
 
-@jitclass
 class Game:
     """A game is similar to a problem, but it has a terminal test instead of 
     a goal test, and a utility for each terminal state. To create a game, 
@@ -27,7 +25,6 @@ class Game:
         """Return the value of this final state to player."""
         raise NotImplementedError
 
-@jitclass
 class Board(defaultdict):
     """A board has the player to move, a cached utility value, 
     and a dict of {(x, y): player} entries, where player is 'X' or 'O'."""
@@ -58,7 +55,6 @@ class Board(defaultdict):
         def row(y): return ' '.join(self[x, y] for x in range(self.width))
         return '\n'.join(map(row, range(self.height))) +  '\n'
 
-@jitclass
 class TicTacToe(Game):
     """Play TicTacToe on an `height` by `width` board, needing `k` in a row to win.
     'X' plays first against 'O'."""
@@ -90,7 +86,6 @@ class TicTacToe(Game):
 
     def display(self, board): print(board)     
 
-@jit
 def k_in_row(board, player, square, k):
     """True if player has k pieces in a line through square."""
     def in_row(x, y, dx, dy): return 0 if board[x, y] != player else 1 + in_row(x + dx, y + dy, dx, dy)
