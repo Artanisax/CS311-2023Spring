@@ -6,7 +6,7 @@ COLOR_BLACK=-1
 COLOR_WHITE=1
 COLOR_NONE=0
 DIRECTION = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
-# random.seed(0)
+random.seed(time.time())
 #don't change the class name
 class AI(object):
     #chessboard_size, color, time_out passed from agent
@@ -23,6 +23,19 @@ class AI(object):
         # You need to add your decision to your candidate_list. The system will get the end of your candidate_list as your decision.
         self.candidate_list = []
 
+    
+    def check(self, chessboard, pos):
+        for direction in DIRECTION:
+            x, y = pos[0]+direction[0], pos[1]+direction[1]
+            if (x < 0 or x >= 8 or y < 0 or y >= 8 or chessboard[x][y] != self.enemy):
+                continue
+            while (x >= 0 and x < 8 and y >= 0 and y < 8 and chessboard[x][y] == self.enemy):
+                x += direction[0]
+                y += direction[1]
+            if (x >= 0 and x < 8 and y >= 0 and y < 8 and chessboard[x][y] == self.color):
+                return True
+        return False
+    
     # The input is the current chessboard. Chessboard is a numpy array.
     def go(self, chessboard):
         # Clear candidate_list, must do this step
@@ -33,7 +46,7 @@ class AI(object):
         idx = np.where(chessboard == COLOR_NONE)
         idx = list(zip(idx[0], idx[1]))
         for pos in idx:
-            if check(self, chessboard, pos):
+            if self.check(chessboard, pos):
                 self.candidate_list.append(pos)
         if (len(self.candidate_list) == 0):
             return
@@ -50,12 +63,16 @@ class AI(object):
         # In above example, we will pick (4,4) as your decision.
         # If there is no valid position, you must return an empty
     
-    def check(self, chessboard, pos):
-        for direction in DIRECTION:
-            x, y = pos[0]+direction[0], pos[1]+direction[1]
-            while (x > 0 and x < 7 and y > 0 and y < 7 and chessboard[x][y] == self.enemy):
-                x += direction[0]
-                y += direction[1]
-            if (x >= 0 and x < 8 and y >= 0 and y < 8 and chessboard[x][y] == self.color):
-                return True
-        return False
+    
+ib = np.array([[0,0,0,-1,0,1,0,0],
+               [0,-1,-1,-1,-1,-1,-1,-1],
+               [1,-1,-1,-1,-1,-1,-1,-1],
+               [1,-1,-1,-1,1,-1,1,-1],
+               [1,-1,-1,1,-1,1,-1,-1],
+               [1,-1,-1,-1,1,1,1,1],
+               [1,0,-1,-1,-1,-1,-1,1],
+               [0,0,0,-1,0,-1,0,0]])
+
+# ai = AI(ib, COLOR_BLACK, 1000)
+# ai.go(ib)
+# print(ai.candidate_list)
