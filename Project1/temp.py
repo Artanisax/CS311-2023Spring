@@ -3,5 +3,5 @@ import numpy as np
 
 import Main
 
-a = math.inf
-
+a = 1
+print(a/2)
