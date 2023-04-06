@@ -6,16 +6,16 @@ import time
 COLOR_BLACK=-1
 COLOR_WHITE=1
 COLOR_NONE=0
-BUFFER_TIME = 0.2
+BUFFER_TIME = 0.3
 DIRECTION = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
-VALUE = [[0, 7, 3, 7, 7, 3, 7, 0],
-         [7, 3, 2, 5, 5, 2, 3, 7],
-         [3, 2, 6, 7, 7, 6, 2, 3],
-         [7, 5, 7, 4, 4, 7, 5, 7],
-         [7, 5, 7, 4, 4, 7, 5, 7],
-         [3, 2, 6, 7, 7, 6, 2, 3],
-         [7, 3, 2, 5, 5, 2, 3, 7],
-         [0, 7, 3, 7, 7, 3, 7, 0]]
+VALUE = [[1, 8, 3, 7, 7, 3, 8, 1],
+         [8, 3, 2, 5, 5, 2, 3, 8],
+         [3, 2, 6, 6, 6, 6, 2, 3],
+         [7, 5, 6, 4, 4, 6, 5, 7],
+         [7, 5, 6, 4, 4, 6, 5, 7],
+         [3, 2, 6, 6, 6, 6, 2, 3],
+         [8, 3, 2, 5, 5, 2, 3, 8],
+         [1, 8, 3, 7, 7, 3, 8, 1]]
 
 random.seed(time.time())
 #don't change the class name
@@ -62,14 +62,7 @@ class AI(object):
             return -36
     
     def evaluate(self, chessboard):
-        valueboard = VALUE.copy()
-        idx = np.where(chessboard != COLOR_NONE)
-        idx = list(zip(idx[0], idx[1]))
-        for pos in idx:
-            # print(pos)
-            if pos[0] != 0 and pos[0] != 7 and pos[1] != 0 and pos[1] != 7:
-                valueboard[7-pos[0]][7-pos[1]] += VALUE[pos[0]][pos[1]]/2
-        return valueboard
+        return VALUE
         
     def alphabeta_pruning(self, chessboard):
         def min_search(step, alpha, beta):
@@ -127,8 +120,6 @@ class AI(object):
             if not flag:
                 move = temp
             limit += 1
-        # if move == None:
-        #     move = self.candidate_list[random.randrange(len(self.candidate_list))]
         return move
     
     # The input is the current chessboard. Chessboard is a numpy array.
@@ -159,12 +150,12 @@ class AI(object):
 
 # ib = np.array([[0,0,0,0,0,0,0,0],
 #                [0,0,0,0,0,0,0,0],
-#                [0,0,-1,0,0,0,0,0],
-#                [0,0,1,-1,-1,0,0,0],
+#                [0,0,0,0,0,0,0,0],
+#                [0,0,0,-1,1,0,0,0],
 #                [0,0,0,1,-1,0,0,0],
-#                [0,-1,-1,-1,1,1,0,0],
-#                [0,0,-1,-1,-1,1,0,0],
-#                [0,0,0,0,1,1,1,0]])
+#                [0,0,0,0,0,0,0,0],
+#                [0,0,0,0,0,0,0,0],
+#                [0,0,0,0,0,0,0,0]])
 
 # ai = AI(ib, COLOR_BLACK, 5)
 # ai.go(ib)
