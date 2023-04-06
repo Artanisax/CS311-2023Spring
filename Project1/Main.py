@@ -8,14 +8,14 @@ COLOR_WHITE=1
 COLOR_NONE=0
 BUFFER_TIME = 0.2
 DIRECTION = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
-VALUE = [[0, 7, 3, 6, 6, 3, 7, 0],
+VALUE = [[0, 7, 3, 7, 7, 3, 7, 0],
          [7, 3, 2, 5, 5, 2, 3, 7],
          [3, 2, 6, 7, 7, 6, 2, 3],
-         [6, 5, 7, 4, 4, 7, 5, 6],
-         [6, 5, 7, 4, 4, 7, 5, 6],
+         [7, 5, 7, 4, 4, 7, 5, 7],
+         [7, 5, 7, 4, 4, 7, 5, 7],
          [3, 2, 6, 7, 7, 6, 2, 3],
          [7, 3, 2, 5, 5, 2, 3, 7],
-         [0, 7, 3, 6, 6, 3, 7, 0]]
+         [0, 7, 3, 7, 7, 3, 7, 0]]
 
 random.seed(time.time())
 #don't change the class name
@@ -66,6 +66,7 @@ class AI(object):
         idx = np.where(chessboard != COLOR_NONE)
         idx = list(zip(idx[0], idx[1]))
         for pos in idx:
+            # print(pos)
             if pos[0] != 0 and pos[0] != 7 and pos[1] != 0 and pos[1] != 7:
                 valueboard[7-pos[0]][7-pos[1]] += VALUE[pos[0]][pos[1]]/2
         return valueboard
@@ -100,7 +101,7 @@ class AI(object):
         def max_search(step, alpha, beta):
             if time.time()-self.start > self.time_out-BUFFER_TIME:
                 return None, None, True
-            nonlocal chessboard, limit
+            nonlocal chessboard
             candidate = self.get_candidate(chessboard, self.color)
             if not candidate:
                 return None, self.judge(chessboard), False
@@ -108,12 +109,8 @@ class AI(object):
             value, move = -math.inf, None
             for pos in candidate:
                 chessboard[pos[0]][pos[1]] = self.color
-                VALUE[7-pos[0]][7-pos[1]] += VALUE[pos[0]][pos[1]]/2.0
                 _, temp, flag = min_search(step+1, alpha, beta)
                 chessboard[pos[0]][pos[1]] = COLOR_NONE
-                VALUE[7-pos[0]][7-pos[1]] -= VALUE[pos[0]][pos[1]]/2.0
-                # if step == 0:
-                #     print(temp)
                 if flag:
                     return None, None, True
                 temp += valueboard[pos[0]][pos[1]]
@@ -130,6 +127,8 @@ class AI(object):
             if not flag:
                 move = temp
             limit += 1
+        # if move == None:
+        #     move = self.candidate_list[random.randrange(len(self.candidate_list))]
         return move
     
     # The input is the current chessboard. Chessboard is a numpy array.
@@ -156,17 +155,17 @@ class AI(object):
         # In above example, we will pick (4,4) as your decision.
         # If there is no valid position, you must return an empty
         self.candidate_list.append(self.alphabeta_pruning(chessboard))
-        print(time.time()-self.start)
+        # print(time.time()-self.start)
 
 # ib = np.array([[0,0,0,0,0,0,0,0],
 #                [0,0,0,0,0,0,0,0],
-#                [0,0,-1,1,1,1,0,0],
-#                [0,0,-1,1,-1,1,0,0],
-#                [0,0,1,1,1,1,0,0],
 #                [0,0,-1,0,0,0,0,0],
-#                [0,0,0,0,0,0,0,0],
-#                [0,0,0,0,0,0,0,0]])
+#                [0,0,1,-1,-1,0,0,0],
+#                [0,0,0,1,-1,0,0,0],
+#                [0,-1,-1,-1,1,1,0,0],
+#                [0,0,-1,-1,-1,1,0,0],
+#                [0,0,0,0,1,1,1,0]])
 
-# ai = AI(ib, COLOR_BLACK, 3)
+# ai = AI(ib, COLOR_BLACK, 5)
 # ai.go(ib)
 # print(ai.candidate_list)
