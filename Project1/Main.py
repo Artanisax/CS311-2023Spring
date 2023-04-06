@@ -1,5 +1,4 @@
 import numpy as np
-import numba as jet
 import math
 import random
 import time
@@ -7,7 +6,7 @@ import time
 COLOR_BLACK=-1
 COLOR_WHITE=1
 COLOR_NONE=0
-BUFFER_TIME = 0.4
+BUFFER_TIME = 0.3
 DIRECTION = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 VALUE = [[1, 8, 3, 7, 7, 3, 8, 1],
          [8, 3, 2, 5, 5, 2, 3, 8],
@@ -56,16 +55,15 @@ class AI(object):
         return 0
         x, y = np.count_nonzero(chessboard == self.color), np.count_nonzero(chessboard == -self.color)
         if x < y:
-            return math.inf
+            return 36
         elif x == y:
-            return -math.inf
+            return 0
         else:
-            return -16
+            return -36
     
     def evaluate(self, chessboard):
         return VALUE
         
-    
     def alphabeta_pruning(self, chessboard):
         def min_search(step, alpha, beta):
             if time.time()-self.start > self.time_out-BUFFER_TIME:
@@ -151,3 +149,16 @@ class AI(object):
         # If there is no valid position, you must return an empty
         self.candidate_list.append(self.alphabeta_pruning(chessboard))
         print(time.time()-self.start)
+
+# ib = np.array([[0,0,0,0,0,0,0,0],
+#                [0,0,0,0,0,0,0,0],
+#                [0,0,-1,1,1,1,0,0],
+#                [0,0,-1,1,-1,1,0,0],
+#                [0,0,1,1,1,1,0,0],
+#                [0,0,-1,0,0,0,0,0],
+#                [0,0,0,0,0,0,0,0],
+#                [0,0,0,0,0,0,0,0]])
+
+# ai = AI(ib, COLOR_BLACK, 3)
+# ai.go(ib)
+# print(ai.candidate_list)
