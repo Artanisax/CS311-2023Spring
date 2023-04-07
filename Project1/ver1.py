@@ -7,16 +7,16 @@ COLOR_BLACK=-1
 COLOR_WHITE=1
 COLOR_NONE=0
 corner = [(0, 0), (0, 7), (7, 0), (7, 7)]
-BUFFER_TIME = 0.3 #0.3
+BUFFER_TIME = 2 #0.3
 DIRECTION = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
-VALUE = [[-100, 36, 3, 7, 7, 3, 36, -100],
-         [36, 39, 2, 4, 4, 2, 36, 36],
-         [3, 2, 1, 8, 8, 1, 2, 3],
-         [7, 4, 8, 16, 16, 8, 4, 7],
-         [7, 4, 8, 16, 16, 8, 4, 7],
-         [3, 2, 1, 8, 8, 1, 2, 3],
-         [36, 36, 2, 4, 4, 2, 36, 36],
-         [-100, 36, 3, 7, 7, 3, 36, -100]]
+VALUE = [[-1000, 36, 3, 6, 6, 3, 36, -1000],
+         [36, 39, 2, 4, 4, 2, 39, 36],
+         [3, 2, 1, 6, 6, 1, 2, 3],
+         [6, 4, 6, 4, 4, 6, 4, 6],
+         [6, 4, 6, 4, 4, 6, 4, 6],
+         [3, 2, 1, 6, 6, 1, 2, 3],
+         [36, 39, 2, 4, 4, 2, 39, 36],
+         [-1000, 36, 3, 6, 6, 3, 36, -1000]]
 
 random.seed(time.time())
 #don't change the class name
@@ -76,12 +76,12 @@ class AI(object):
         table = VALUE.copy()
         idx = np.where(chessboard == self.color)
         idx = list(zip(idx[0], idx[1]))
-        for pos in corner:
-            if pos in idx:
-                for i in range(8):
-                    x, y = pos[0]+DIRECTION[i][0], pos[1]+DIRECTION[i][1]
-                    if x >= 0 and x < 8 and y >= 0 and y < 8:
-                        table[x][y] = -table[x][y]
+        # for pos in corner:
+        #     if pos in idx:
+        #         for i in range(8):
+        #             x, y = pos[0]+DIRECTION[i][0], pos[1]+DIRECTION[i][1]
+        #             if x >= 0 and x < 8 and y >= 0 and y < 8:
+        #                 table[x][y] = -table[x][y]
         ret = 0
         for pos in idx:
             ret += table[pos[0]][pos[1]]
