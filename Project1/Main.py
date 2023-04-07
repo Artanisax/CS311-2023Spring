@@ -12,14 +12,14 @@ AP = 16
 MID = 25
 corner = [(0, 0), (0, 7), (7, 0), (7, 7)]
 DIRECTION = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
-VALUE = [[-250, 49, 2, 7, 7, 2, 49, -250],
+VALUE = [[-500, 49, -5, 7, 7, -5, 49, -500],
          [49, 36, 2, 4, 4, 2, 36, 49],
-         [2, 2, 1, 6, 6, 1, 2, 2],
+         [-5, 2, 1, 6, 6, 1, 2, -5],
          [7, 4, 6, 4, 4, 6, 4, 7],
          [7, 4, 6, 4, 4, 6, 4, 7],
-         [2, 2, 1, 6, 6, 1, 2, 2],
+         [-5, 2, 1, 6, 6, 1, 2, -5],
          [49, 36, 2, 4, 4, 2, 36, 49],
-         [-250, 49, 2, 7, 7, 2, 49, -250]]
+         [-500, 49, 2, 7, 7, 2, 49, -500]]
 
 random.seed(time.time())
 #don't change the class name
@@ -90,9 +90,8 @@ class AI(object):
             ret += table[pos[0]][pos[1]]
         idx = np.where(chessboard == -self.color)
         idx = list(zip(idx[0], idx[1]))
-        ret = 0
         for pos in idx:
-            ret -= table[pos[0]][pos[1]]
+            ret -= table[pos[0]][pos[1]]/2
         return ret
     
     def stable(self, chessboard):

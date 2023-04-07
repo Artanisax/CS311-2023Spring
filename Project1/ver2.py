@@ -89,7 +89,6 @@ class AI(object):
             ret += table[pos[0]][pos[1]]
         idx = np.where(chessboard == -self.color)
         idx = list(zip(idx[0], idx[1]))
-        ret = 0
         for pos in idx:
             ret -= table[pos[0]][pos[1]]/2
         return ret
