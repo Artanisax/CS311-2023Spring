@@ -6,20 +6,19 @@ import time
 COLOR_BLACK=-1
 COLOR_WHITE=1
 COLOR_NONE=0
-BUFFER_TIME = 0.3
+BUFFER_TIME = 0.5
 
 AP = 16
-MID = 25
 corner = [(0, 0), (0, 7), (7, 0), (7, 7)]
 DIRECTION = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
-VALUE = [[-250, 49, 2, 7, 7, 2, 49, -250],
+VALUE = [[-250, 49, 3, 7, 7, 3, 49, -250],
          [49, 36, 2, 4, 4, 2, 36, 49],
-         [2, 2, 1, 6, 6, 1, 2, 2],
-         [7, 4, 6, 4, 4, 6, 4, 7],
-         [7, 4, 6, 4, 4, 6, 4, 7],
-         [2, 2, 1, 6, 6, 1, 2, 2],
+         [3, 2, 1, 6, 6, 1, 2, 3],
+         [7, 4, 6, 5, 5, 6, 4, 7],
+         [7, 4, 6, 5, 5, 6, 4, 7],
+         [3, 2, 1, 6, 6, 1, 2, 3],
          [49, 36, 2, 4, 4, 2, 36, 49],
-         [-250, 49, 2, 7, 7, 2, 49, -250]]
+         [-250, 49, 3, 7, 7, 3, 49, -250]]
 
 random.seed(time.time())
 #don't change the class name
@@ -92,13 +91,9 @@ class AI(object):
         idx = list(zip(idx[0], idx[1]))
         ret = 0
         for pos in idx:
-            ret -= table[pos[0]][pos[1]]
+            ret -= table[pos[0]][pos[1]]/2
         return ret
-    
-    def stable(self, chessboard):
         
-        return
-    
     def beginning(self, chessboard):
         def min_search(step, board, alpha, beta):
             nonlocal limit
@@ -106,7 +101,7 @@ class AI(object):
                 return None, None, True
             candidate = self.get_candidate(board, -self.color)
             if step == limit:
-                return None, self.evaluate(board)-AP*len(candidate)*abs(MID-np.count_nonzero(board != COLOR_NONE))/MID, False
+                return None, self.evaluate(board)-AP*len(candidate)*abs(30-np.count_nonzero(board != COLOR_NONE))/30, False
             if not candidate:
                 return None, self.judge(board)+self.judge(board)*64, False
             value, move = math.inf, None
@@ -128,7 +123,7 @@ class AI(object):
                 return None, None, True
             candidate = self.get_candidate(board, self.color)
             if step == limit:
-                return None, self.evaluate(board)+AP*len(candidate)*abs(MID-np.count_nonzero(board != COLOR_NONE))/MID, False
+                return None, self.evaluate(board)+AP*len(candidate)*abs(30-np.count_nonzero(board != COLOR_NONE))/30, False
             if not candidate:
                 return None, self.evaluate(board)+self.judge(board)*64, False
             value, move = -math.inf, None
@@ -144,13 +139,12 @@ class AI(object):
                     alpha = temp
             return move, value, False
         
-        move, limit, flag = None, 3, False
+        move, limit, flag = None, 5, False
         while True:
             temp, _, flag = max_search(0, chessboard, -math.inf, math.inf)
             if flag:
                 break
             move = temp
-            # print(limit, move)
             limit += 1
         return move
     
@@ -199,13 +193,12 @@ class AI(object):
                     alpha = temp
             return move, value, False
         
-        move, limit, flag = None, 3, False
+        move, limit, flag = None, 5, False
         while True:
             temp, _, flag = max_search(0, chessboard, -math.inf, math.inf)
             if flag:
                 break
             move = temp
-            # print(limit, move)
             limit += 1
         return move
     
@@ -222,16 +215,23 @@ class AI(object):
             move = self.beginning(chessboard)
         self.candidate_list.append(move)
 
+# ib = np.array([[0,0,0,0,0,-1,0,0],
+#       [0,0,0,0,-1,0,1,0],
+#       [0,0,0,-1,1,1,0,0],
+#       [0,0,-1,-1,1,0,0,0],
+#       [0,0,1,-1,1,0,0,0],
+#       [0,0,1,0,0,0,0,0],
+#       [0,0,1,0,0,0,0,0],
+#       [0,0,0,0,0,0,0,0]])
+
 # ib = np.array([[0,0,0,0,0,0,0,0],
-#                [0,1,0,0,0,0,0,0],
-#                [0,-1,1,1,1,0,0,0],
+#                [0,0,0,0,0,0,0,0],
+#                [0,0,0,0,0,0,0,0],
 #                [0,0,0,1,-1,0,0,0],
-#                [0,0,0,-1,-1,-1,0,0],
-#                [0,0,0,0,-1,1,0,0],
+#                [0,0,0,-1,1,0,0,0],
+#                [0,0,0,0,0,0,0,0],
 #                [0,0,0,0,0,0,0,0],
 #                [0,0,0,0,0,0,0,0]])
-
-# print(ib)
 
 # ai = AI(ib, COLOR_BLACK, 5)
 
