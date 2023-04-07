@@ -9,21 +9,13 @@ COLOR_NONE=0
 BUFFER_TIME = 0.3
 DIRECTION = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 VALUE = [[1, 8, 3, 7, 7, 3, 8, 1],
-         [8, 5, 2, 4, 4, 2, 5, 8],
+         [8, 3, 2, 4, 4, 2, 3, 8],
          [3, 2, 6, 6, 6, 6, 2, 3],
          [7, 4, 6, 4, 4, 6, 4, 7],
          [7, 4, 6, 4, 4, 6, 4, 7],
          [3, 2, 6, 6, 6, 6, 2, 3],
-         [8, 5, 2, 4, 4, 2, 5, 8],
+         [8, 3, 2, 4, 4, 2, 3, 8],
          [1, 8, 3, 7, 7, 3, 8, 1]]
-BIAS = [[-2, 2, 0, 0, 0, 0, 2, -2],
-        [2, 1, 2, 1, 1, 2, 1, 2],
-        [0, 2, 0, 3, 3, 0, 2, 0],
-        [0, 1, 3, 0, 0, 3, 1, 0],
-        [0, 1, 3, 0, 0, 3, 1, 0],
-        [0, 2, 0, 3, 3, 0, 2, 0],
-        [2, 1, 2, 1, 1, 2, 1, 2],
-        [-2, 2, 0, 0, 0, 0, 2, -2]]
 
 random.seed(time.time())
 #don't change the class name
@@ -65,21 +57,19 @@ class AI(object):
         return y-x
     
     def evaluate(self, chessboard):
-        ret, idx = 0, np.where(chessboard == self.color)
-        for pos in idx:
-            ret += VALUE[pos[0]][pos[1]]
-        return ret
+        return VALUE
         
-    def beginning(self, chessboard):
+    def opening(self, chessboard):
         def min_search(step, alpha, beta):
             nonlocal chessboard, limit
             if time.time()-self.start > self.time_out-BUFFER_TIME:
                 return None, None, True
             if step == limit:
-                return None, self.evaluate(chessboard), False
+                return None, 0, False
             candidate = self.get_candidate(chessboard, -self.color)
             if not candidate:
                 return None, self.judge(chessboard), False
+            valueboard = self.evaluate(chessboard)
             value, move = math.inf, None
             for pos in candidate:
                 chessboard[pos[0]][pos[1]] = -self.color
@@ -87,6 +77,7 @@ class AI(object):
                 chessboard[pos[0]][pos[1]] = COLOR_NONE
                 if flag:
                     return None, None, True
+                temp += valueboard[pos[0]][pos[1]]
                 if temp <= alpha:
                     return None, temp, False
                 if temp < value:
@@ -102,6 +93,7 @@ class AI(object):
             candidate = self.get_candidate(chessboard, self.color)
             if not candidate:
                 return None, self.judge(chessboard), False
+            valueboard = self.evaluate(chessboard)
             value, move = -math.inf, None
             for pos in candidate:
                 chessboard[pos[0]][pos[1]] = self.color
@@ -109,6 +101,7 @@ class AI(object):
                 chessboard[pos[0]][pos[1]] = COLOR_NONE
                 if flag:
                     return None, None, True
+                temp += valueboard[pos[0]][pos[1]]
                 if temp >= beta:
                     return None, temp, False
                 if temp > value:
@@ -125,7 +118,7 @@ class AI(object):
             limit += 1
         return move
     
-    def middle(self, chessboard):
+    def action_point(self, chessboard):
         def min_search(step, alpha, beta):
             nonlocal chessboard
             if time.time()-self.start > self.time_out-BUFFER_TIME:
@@ -164,7 +157,6 @@ class AI(object):
                 chessboard[pos[0]][pos[1]] = COLOR_NONE
                 if flag:
                     return None, None, True
-                temp += BIAS[pos[0]][pos[1]]
                 if temp >= beta:
                     return None, temp, False
                 if temp > value:
@@ -181,7 +173,7 @@ class AI(object):
             limit += 1
         return move
     
-    def ending(self, chessboard):
+    def endgame(self, chessboard):
         def min_search(step, alpha, beta):
             nonlocal chessboard, limit
             if time.time()-self.start > self.time_out-BUFFER_TIME:
@@ -257,11 +249,11 @@ class AI(object):
         cnt, edge = self.count_pieces(chessboard)
         move = None
         if cnt < 12 and edge <= 1:
-            move = self.beginning(chessboard)
+            move = self.opening(chessboard)
         elif cnt < 49:
-            move = self.middle(chessboard)
+            move = self.action_point(chessboard)
         else:
-            move = self.ending(chessboard)
+            move = self.endgame(chessboard)
         # if move == None:
         #     move = self.candidate_list[0]
         self.candidate_list.append(move)
