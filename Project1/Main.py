@@ -9,14 +9,14 @@ COLOR_NONE=0
 BUFFER_TIME = 0.3
 
 AP = 16
-MID = 25
+MID = 30
 corner = [(0, 0), (0, 7), (7, 0), (7, 7)]
 DIRECTION = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 VALUE = [[-500, 49, -5, 7, 7, -5, 49, -500],
          [49, 36, 2, 4, 4, 2, 36, 49],
          [-5, 2, 1, 6, 6, 1, 2, -5],
-         [7, 4, 6, 4, 4, 6, 4, 7],
-         [7, 4, 6, 4, 4, 6, 4, 7],
+         [7, 4, 6, 5, 5, 6, 4, 7],
+         [7, 4, 6, 5, 5, 6, 4, 7],
          [-5, 2, 1, 6, 6, 1, 2, -5],
          [49, 36, 2, 4, 4, 2, 36, 49],
          [-500, 49, 2, 7, 7, 2, 49, -500]]
@@ -79,19 +79,19 @@ class AI(object):
         table = VALUE.copy()
         idx = np.where(chessboard == self.color)
         idx = list(zip(idx[0], idx[1]))
-        for pos in corner:
-            if pos in idx:
-                for i in range(8):
-                    x, y = pos[0]+DIRECTION[i][0], pos[1]+DIRECTION[i][1]
-                    if x >= 0 and x < 8 and y >= 0 and y < 8:
-                        table[x][y] = -table[x][y]
+        # for pos in corner:
+        #     if pos in idx:
+        #         for i in range(8):
+        #             x, y = pos[0]+DIRECTION[i][0], pos[1]+DIRECTION[i][1]
+        #             if x >= 0 and x < 8 and y >= 0 and y < 8:
+        #                 table[x][y] = -table[x][y]
         ret = 0
         for pos in idx:
             ret += table[pos[0]][pos[1]]
         idx = np.where(chessboard == -self.color)
         idx = list(zip(idx[0], idx[1]))
         for pos in idx:
-            ret -= table[pos[0]][pos[1]]/2
+            ret -= table[pos[0]][pos[1]]
         return ret
     
     def stable(self, chessboard):
@@ -204,7 +204,7 @@ class AI(object):
             if flag:
                 break
             move = temp
-            # print(limit, move)
+            print(limit, move)
             limit += 1
         return move
     
@@ -215,25 +215,22 @@ class AI(object):
         if (len(self.candidate_list) == 0):
             return
         self.candidate_list.append(self.candidate_list[random.randrange(len(self.candidate_list))])
-        if np.count_nonzero(chessboard == COLOR_NONE) <= 10:
+        if np.count_nonzero(chessboard == COLOR_NONE) <= 8:
             move = self.ending(chessboard)
         else:
             move = self.beginning(chessboard)
         self.candidate_list.append(move)
 
-# ib = np.array([[0,0,0,0,0,0,0,0],
-#                [0,1,0,0,0,0,0,0],
-#                [0,-1,1,1,1,0,0,0],
-#                [0,0,0,1,-1,0,0,0],
-#                [0,0,0,-1,-1,-1,0,0],
-#                [0,0,0,0,-1,1,0,0],
-#                [0,0,0,0,0,0,0,0],
-#                [0,0,0,0,0,0,0,0]])
+# ib = np.array([[-1,0,0,0,-1,1,1,0],
+#                [-1,-1,0,-1,1,1,-1,0],
+#                [-1,-1,-1,1,-1,1,-1,0],
+#                [-1,-1,1,1,1,1,1,1],
+#                [-1,-1,-1,-1,-1,1,1,1],
+#                [-1,-1,-1,-1,-1,1,1,0],
+#                [1,1,1,1,1,1,1,0],
+#                [0,1,1,1,1,1,1,1]])
 
 # print(ib)
-
 # ai = AI(ib, COLOR_BLACK, 5)
-
 # ai.go(ib)
-
 # print(ai.candidate_list)
