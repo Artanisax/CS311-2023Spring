@@ -4,8 +4,10 @@ import queue
 import random
 import numpy as np
 
-TIME_BUFFER = 1
 start_time = time.time()
+
+TIME_BUFFER = 1
+INT_MAX = np.iinfo(int).max
 
 input
 data = sys.argv[1]
@@ -25,12 +27,12 @@ with open(data) as f:
 # decode
 name = content[0][2]
 vertices = int(content[1][2])
-depot = int(content[2][2])
+depot = int(content[2][2])-1
 required_edges = int(content[3][3])
 non_required_edges = int(content[4][3])
 vehicles = int(content[5][2])
-capacity = float(content[6][2])
-total = float(content[7][6])
+capacity = int(content[6][2])
+total = int(content[7][6])
 table = content[9:]
 
 edge = [[] for _ in range(vertices)]
@@ -41,19 +43,19 @@ for line in table:
     edge[v].append((u, w))
     if d != 0:
         requirements.append((u, v, w, d))
-requirements = np.array(requirements)
+requirements = np.array(requirements, dtype=int)
 
 class Solution:
     def __init__(self):
         self.routes = [[] for _ in range(vehicles)]
-        self.cost = np.inf
+        self.cost = INT_MAX
     
     def __str__(self):
         s = 's '
         for route in self.routes:
             s += '0,'
             for e in route:
-                s += '('+str(e[0])+','+str(e[1])+'),'
+                s += '('+str(e[0]+1)+','+str(e[1]+1)+'),'
             s += '0,'
         s = s.rstrip(',')
         s += '\nq '+str(self.cost)
@@ -62,17 +64,19 @@ class Solution:
     def update(self):
         self.cost = 0
         for route in self.routes:
-            w = 0
+            u, w = depot, 0
             for e in route:
-                w += requirements[e[2]][2]
+                w += requirements[e[2]][3]
                 if w > capacity:
                     self.cost = np.inf
                     return
-            self.cost += w
-        return NotImplementedError
+                self.cost += dist[u][e[0]]+requirements[e[2]][2]
+                u = e[1]
+            self.cost += dist[u][depot]
 
 # SP
-dist = np.full((vertices, vertices), np.inf)
+dist = np.full((vertices, vertices), INT_MAX)
+
 for s in range(vertices):
     dist[s][s] = 0
     q = queue.PriorityQueue()
@@ -96,16 +100,33 @@ def get_next(last, allowance, rest, rule):
     if rule == 0:
         for id in rest:
             e = requirements[id]
-            if e[4] > allowance:
+            if e[3] > allowance:
                 continue
             u, v = e[0], e[1]
             if dist[depot][u] > dist[depot][v]:
                 u, v = v, u
-            if dist[depot][v] > dist[depot][ret[1]]:
+            if not ret or dist[depot][v] > dist[depot][ret[1]]:
                 ret = (u, v, id)
     elif rule == 1:
-        
-        return NotImplementedError
+        for id in rest:
+            e = requirements[id]
+            if e[3] > allowance:
+                continue
+            u, v = e[0], e[1]
+            if dist[depot][u] < dist[depot][v]:
+                u, v = v, u
+            if not ret or dist[depot][v] < dist[depot][ret[1]]:
+                ret = (u, v, id)
+    elif rule == 2:
+        for id in rest:
+            e = requirements[id]
+            if e[3] > allowance:
+                continue
+            u, v = e[0], e[1]
+            if dist[depot][u] < dist[depot][v]:
+                u, v = v, u
+            if not ret or dist[depot][v] < dist[depot][ret[1]]:
+                ret = (u, v, id)
     return ret
 
 def path_scan(rule):
@@ -115,18 +136,24 @@ def path_scan(rule):
         u, w = 0, 0
         while True:
             e = get_next(u, capacity-w, rest, rule)
-            if not id:
+            if not e:
                 break
-            w += requirements[e[2]][2]
+            w += requirements[e[2]][3]
             route.append(e)
             rest.remove(e[2])
+            u = e[1]
+    if rest:
+        return None
     solution.update()
     return solution
 
 best = Solution()
 pool = []
-for rule in range(5):
+for rule in range(3):
     solution = path_scan(rule)
+    print(str(rule)+':\n', solution, '\n')
+    if not solution:
+        continue
     pool.append(solution)
     if solution.cost > best.cost:
         best = solution

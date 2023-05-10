@@ -1,5 +1,3 @@
-t = (1, 2, 3, 4)
+import sys
 
-tp = t[0:2]
-
-print(t, tp, isinstance(tp, tuple))
+print(isinstance(sys.maxsize, int))
