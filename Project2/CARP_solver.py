@@ -118,15 +118,15 @@ def get_next(last, allowance, rest, rule):
             if not ret or dist[depot][v] < dist[depot][ret[1]]:
                 ret = (u, v, id)
     elif rule == 2:
-        for id in rest:
-            e = requirements[id]
-            if e[3] > allowance:
-                continue
-            u, v = e[0], e[1]
-            if dist[depot][u] < dist[depot][v]:
-                u, v = v, u
-            if not ret or dist[depot][v] < dist[depot][ret[1]]:
-                ret = (u, v, id)
+        if allowance > capacity*2:
+            ret = get_next(last, allowance, rest, 0)
+        else:
+            ret = get_next(last, allowance, rest, 1)
+    elif rule == 3:
+        if allowance > capacity*2/3 or allowance < capacity/3:
+            ret = get_next(last, allowance, rest, 1)
+        else:
+            ret = get_next(last, allowance, rest, 0)
     return ret
 
 def path_scan(rule):
@@ -158,7 +158,7 @@ for rule in range(3):
     if solution.cost > best.cost:
         best = solution
 
-def rand_init(n):
+def generate(n):
     for _ in range(n):
         solution = Solution()
         
