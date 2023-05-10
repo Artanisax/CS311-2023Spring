@@ -202,7 +202,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
         else:
             ret = get_next(last, allowance, rest, 11, cost)
     elif rule == 13:
-        if allowance > capacity/3:
+        if allowance > capacity/4:
             ret = get_next(last, allowance, rest, 10, cost)
         else:
             ret = get_next(last, allowance, rest, 11, cost)
