@@ -64,7 +64,7 @@ class Solution:
         s += '\nq '+str(self.cost)
         return s
 
-    def update(self):
+    def refresh(self):
         self.cost = 0
         for route in self.routes:
             u, w = depot, 0
@@ -247,7 +247,7 @@ def path_scan(rule):
             u = e[1]
     if rest:
         return None
-    solution.update()
+    solution.refresh()
     return solution
 
 best = Solution()
@@ -280,7 +280,7 @@ class MyThread(threading.Thread):
                 solution.routes[i] = edges[l:idx[i]]
                 l = idx[i]
             solution.routes[vehicles-1] = edges[l:required_edges]
-            solution.update()
+            solution.refresh()
             ret.append(solution)
         return ret
 
@@ -293,8 +293,10 @@ class MyThread(threading.Thread):
             if not route:
                 return solution
             idx = np.random.randint(0, len(route))
-            u, v = edge[1::-1]
-            return NotImplementedError
+            edge = route[idx]
+            route[idx] = (edge[1], edge[0], edge[2])
+            solution.refresh()
+            return solution
         elif type == 1:  # swap 2 edges in one route
             
             return NotImplementedError
