@@ -17,6 +17,7 @@ termination = int(sys.argv[3])
 seed = int(sys.argv[5])
 
 random.seed(seed)
+np.random.seed(seed)
 
 content = []
 with open(data) as f:
@@ -248,6 +249,7 @@ def path_scan(rule):
         return None
     solution.update()
     return solution
+
 best = Solution()
 pool = []
 for rule in range(16):
@@ -258,34 +260,62 @@ for rule in range(16):
     if solution.cost < best.cost:
         best = solution
 
-def generate(n):
-    for _ in range(n):
-        solution = Solution()
-        
-    return NotImplementedError
-
-def mutex(solution, type):
-    
-    return NotImplementedError
-
-def reproduce(death_rate, survive_rate):
-    
-    return NotImplementedError
-
-def selection(disaster_rate, survive_rate, K):
-    
-    return NotImplementedError
-
 class MyThread(threading.Thread):
     
+    def generate(n):
+        ret = []
+        for _ in range(n):
+            solution = Solution()
+            edges = []
+            for i in range(required_edges):
+                u, v = requirements[i][0], requirements[i][1]
+                if np.random.rand() < 0.5:
+                    u, v = v, u
+                edges.append((u, v, i))
+            random.shuffle(edges)                                   # randomly arrage the edges 
+            idx = np.random.randint(0, required_edges, vehicles-1)  # chop the routes
+            idx = np.sort(idx)
+            l = 0
+            for i in range(vehicles-1):
+                solution.routes[i] = edges[l:idx[i]]
+                l = idx[i]
+            solution.routes[vehicles-1] = edges[l:required_edges]
+            solution.update()
+            ret.append(solution)
+        return ret
+
+    def mutex(solution, type):
+        if type == 0:  # reverse a single edge
+            
+            return NotImplementedError
+        elif type == 1:  # swap 2 edges in one route
+            
+            return NotImplementedError
+        elif type == 2:  # move one edge from a route to another
+            
+            return NotImplementedError
+        elif type == 3:  # swap 2 edges from different routes
+            
+            return NotImplementedError
+        return NotImplementedError
+
+    def reproduce(pool, death_rate, survive_rate):
+        
+        return NotImplementedError
+
+    def selection(disaster_rate, survive_rate, K):
+    
+        return NotImplementedError
+    
     def __init__(self, id, micro, K, pool):
+        threading.Thread.__init__(self)
         self.id = id
         self.micro = micro
         self.K = K
         self.pool = pool
+    
+    def run(self) -> None:
         
-    def run(self):
-        
-        return NotImplementedError
+        return super().run()
 
 print(best)
