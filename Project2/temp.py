@@ -9,6 +9,6 @@ import numpy as np
 
 edge = (1, 2, 3, 4)
 
-u, v = edge[0:2]
+u, v = edge[:2]
 
 print(u, v)

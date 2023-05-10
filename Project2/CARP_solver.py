@@ -105,7 +105,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0:2]
+            u, v = e[:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
@@ -116,7 +116,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0:2]
+            u, v = e[:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
@@ -143,7 +143,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0], e[1]
+            u, v = e[:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
@@ -154,7 +154,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0:2]
+            u, v = e[:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
@@ -181,7 +181,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0:2]
+            u, v = e[:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if (d+e[3])/(cost+dist[last][u]+e[2]) > p:
@@ -192,7 +192,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0:2]
+            u, v = e[:2]
             if dist[last][v]+dist[u][depot] < dist[last][u]+dist[v][depot]:
                 u, v = v, u
             if (d+e[3])/(cost+dist[last][u]+e[2]+dist[v][depot]) > p:
@@ -293,7 +293,7 @@ class MyThread(threading.Thread):
             if not route:
                 return solution
             idx = np.random.randint(0, len(route))
-            u, v = edge[0:2]
+            u, v = edge[1::-1]
             return NotImplementedError
         elif type == 1:  # swap 2 edges in one route
             
