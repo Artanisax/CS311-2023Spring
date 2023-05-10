@@ -7,7 +7,7 @@ import numpy as np
 TIME_BUFFER = 1
 start_time = time.time()
 
-# input
+input
 data = sys.argv[1]
 termination = int(sys.argv[3])
 seed = int(sys.argv[5])
@@ -53,9 +53,9 @@ class Solution:
         for route in self.routes:
             s += '0,'
             for e in route:
-                s += '('+str(e[0])+str(e[1])+')'
+                s += '('+str(e[0])+','+str(e[1])+'),'
             s += '0,'
-        s.rstrip(',')
+        s = s.rstrip(',')
         s += '\nq '+str(self.cost)
         return s
 
@@ -89,15 +89,24 @@ for s in range(vertices):
                 q.put((dist[s][v], v))
 
 # stochastic solution/ initialize pool
-
-
-def get_next(u, w, rest, rule):
+def get_next(last, allowance, rest, rule):
     if not rest:
         return None
+    ret = None
     if rule == 0:
-        return 
-    
-    return NotImplementedError
+        for id in rest:
+            e = requirements[id]
+            if e[4] > allowance:
+                continue
+            u, v = e[0], e[1]
+            if dist[depot][u] > dist[depot][v]:
+                u, v = v, u
+            if dist[depot][v] > dist[depot][ret[1]]:
+                ret = (u, v, id)
+    elif rule == 1:
+        
+        return NotImplementedError
+    return ret
 
 def path_scan(rule):
     solution = Solution()
@@ -105,12 +114,12 @@ def path_scan(rule):
     for route in solution.routes:
         u, w = 0, 0
         while True:
-            e = get_next(u, w, rest, rule)
-            if not e:
+            e = get_next(u, capacity-w, rest, rule)
+            if not id:
                 break
             w += requirements[e[2]][2]
             route.append(e)
-            rest.pop(e)
+            rest.remove(e[2])
     solution.update()
     return solution
 
@@ -118,12 +127,14 @@ best = Solution()
 pool = []
 for rule in range(5):
     solution = path_scan(rule)
-    pool.append(path_scan(rule))
+    pool.append(solution)
     if solution.cost > best.cost:
         best = solution
 
-def rand_init():
-    
+def rand_init(n):
+    for _ in range(n):
+        solution = Solution()
+        
     return NotImplementedError
 
 def mutex(solution, type):

@@ -1,5 +1,5 @@
-li = [(1, 2), (2, 3), (2, 2)]
-print(li)
-li.pop((2, 3))
-li.
-print(li)
+t = (1, 2, 3, 4)
+
+tp = t[0:2]
+
+print(t, tp, isinstance(tp, tuple))
