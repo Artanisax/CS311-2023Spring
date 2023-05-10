@@ -95,7 +95,7 @@ for s in range(vertices):
                 q.put((dist[s][v], v))
 
 # stochastic solution/ initialize pool
-def get_next(last, allowance, rest, rule):
+def get_next(last, allowance, rest, rule, cost=-1):
     if not rest:
         return None
     ret = None
@@ -105,7 +105,7 @@ def get_next(last, allowance, rest, rule):
             if e[3] > allowance:
                 continue
             u, v = e[0], e[1]
-            if (dist[last][v] < dist[last][u]):
+            if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
             or (dist[last][ret[0]] == dist[last][u] and dist[v][depot] < dist[ret[1]][depot]):
@@ -116,7 +116,7 @@ def get_next(last, allowance, rest, rule):
             if e[3] > allowance:
                 continue
             u, v = e[0], e[1]
-            if (dist[last][v] < dist[last][u]):
+            if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
             or (dist[last][ret[0]] == dist[last][u] and dist[v][depot] > dist[ret[1]][depot]):
@@ -143,7 +143,7 @@ def get_next(last, allowance, rest, rule):
             if e[3] > allowance:
                 continue
             u, v = e[0], e[1]
-            if (dist[last][v] < dist[last][u]):
+            if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
             or (dist[ret[1]][depot]-dist[v][depot] > dist[last][u]-dist[last][ret[0]]):
@@ -154,7 +154,7 @@ def get_next(last, allowance, rest, rule):
             if e[3] > allowance:
                 continue
             u, v = e[0], e[1]
-            if (dist[last][v] < dist[last][u]):
+            if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
             or (dist[v][depot]-dist[ret[1]][depot] > dist[last][u]-dist[last][ret[0]]):
@@ -174,19 +174,61 @@ def get_next(last, allowance, rest, rule):
             ret = get_next(last, allowance, rest, 5)
         else:
             ret = get_next(last, allowance, rest, 6)
-            
+    elif rule == 10:  # no way back
+        d, p = capacity-allowance, 0
+        for id in rest:
+            e = requirements[id]
+            if e[3] > allowance:
+                continue
+            u, v = e[0], e[1]
+            if dist[last][v] < dist[last][u]:
+                u, v = v, u
+            if (d+e[3])/(cost+dist[last][u]+e[2]) > p:
+                ret = (u, v, id)
+    elif rule == 11:  # way back
+        d, p = capacity-allowance, 0
+        for id in rest:
+            e = requirements[id]
+            if e[3] > allowance:
+                continue
+            u, v = e[0], e[1]
+            if dist[last][v]+dist[u][depot] < dist[last][u]+dist[v][depot]:
+                u, v = v, u
+            if (d+e[3])/(cost+dist[last][u]+e[2]+dist[v][depot]) > p:
+                ret = (u, v, id)
+    elif rule == 12:
+        if allowance > capacity/2:
+            ret = get_next(last, allowance, rest, 10, cost)
+        else:
+            ret = get_next(last, allowance, rest, 11, cost)
+    elif rule == 13:
+        if allowance > capacity/3:
+            ret = get_next(last, allowance, rest, 10, cost)
+        else:
+            ret = get_next(last, allowance, rest, 11, cost)
+    elif rule == 14:
+        if allowance > capacity/4:
+            ret = get_next(last, allowance, rest, 10, cost)
+        else:
+            ret = get_next(last, allowance, rest, 11, cost)
+    elif rule == 15:
+        if allowance > capacity/5:
+            ret = get_next(last, allowance, rest, 10, cost)
+        else:
+            ret = get_next(last, allowance, rest, 11, cost)
     return ret
 
 def path_scan(rule):
     solution = Solution()
     rest = [i for i in range(required_edges)]
     for route in solution.routes:
-        u, w = 0, 0
+        u, w, c = 0, 0, 0
         while True:
-            e = get_next(u, capacity-w, rest, rule)
+            e = get_next(u, capacity-w, rest, rule, c)
             if not e:
                 break
             w += requirements[e[2]][3]
+            c += dist[u][e[0]]+requirements[e[2]][2]
             route.append(e)
             rest.remove(e[2])
             u = e[1]
@@ -196,7 +238,7 @@ def path_scan(rule):
     return solution
 best = Solution()
 pool = []
-for rule in range(8):
+for rule in range(16):
     solution = path_scan(rule)
     if not solution:
         continue
