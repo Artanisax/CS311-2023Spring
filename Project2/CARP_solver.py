@@ -207,15 +207,27 @@ def get_next(last, allowance, rest, rule, cost=-1):
         else:
             ret = get_next(last, allowance, rest, 11, cost)
     elif rule == 14:
-        if allowance > capacity/4:
-            ret = get_next(last, allowance, rest, 10, cost)
-        else:
-            ret = get_next(last, allowance, rest, 11, cost)
+        for id in rest:
+            e = requirements[id]
+            if e[3] > allowance:
+                continue
+            u, v = e[0], e[1]
+            if dist[last][v] < dist[last][u]:
+                u, v = v, u
+            if not ret or e[3] < requirements[ret[2]][3] \
+            or (e[3] == requirements[ret[2]][3] and dist[last][u] < dist[last][ret[0]]):
+                ret = (u, v, id)
     elif rule == 15:
-        if allowance > capacity/5:
-            ret = get_next(last, allowance, rest, 10, cost)
-        else:
-            ret = get_next(last, allowance, rest, 11, cost)
+        for id in rest:
+            e = requirements[id]
+            if e[3] > allowance:
+                continue
+            u, v = e[0], e[1]
+            if dist[last][v] < dist[last][u]:
+                u, v = v, u
+            if not ret or e[3] > requirements[ret[2]][3] \
+            or (e[3] == requirements[ret[2]][3] and dist[last][u] < dist[last][ret[0]]):
+                ret = (u, v, id)
     return ret
 
 def path_scan(rule):
@@ -246,6 +258,12 @@ for rule in range(16):
     if solution.cost < best.cost:
         best = solution
 
+def generate(n):
+    for _ in range(n):
+        solution = Solution()
+        
+    return NotImplementedError
+
 def mutex(solution, type):
     
     return NotImplementedError
@@ -259,11 +277,6 @@ def selection(disaster_rate, survive_rate, K):
     return NotImplementedError
 
 class MyThread(threading.Thread):
-    def generate(n):
-        for _ in range(n):
-            solution = Solution()
-            
-        return NotImplementedError
     
     def __init__(self, id, micro, K, pool):
         self.id = id
