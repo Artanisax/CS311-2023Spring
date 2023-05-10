@@ -151,11 +151,11 @@ best = Solution()
 pool = []
 for rule in range(3):
     solution = path_scan(rule)
-    print(str(rule)+':\n', solution, '\n')
+    # print(str(rule)+':\n', solution, '\n')
     if not solution:
         continue
     pool.append(solution)
-    if solution.cost > best.cost:
+    if solution.cost < best.cost:
         best = solution
 
 def generate(n):
