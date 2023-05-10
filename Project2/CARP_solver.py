@@ -2,6 +2,8 @@ import sys
 import time
 import queue
 import random
+import threading
+
 import numpy as np
 
 start_time = time.time()
@@ -97,36 +99,82 @@ def get_next(last, allowance, rest, rule):
     if not rest:
         return None
     ret = None
-    if rule == 0:
+    if rule == 0:  # close
         for id in rest:
             e = requirements[id]
             if e[3] > allowance:
                 continue
             u, v = e[0], e[1]
-            if dist[depot][u] > dist[depot][v]:
+            if (dist[last][v] < dist[last][u]):
                 u, v = v, u
-            if not ret or dist[depot][v] > dist[depot][ret[1]]:
+            if not ret or dist[last][u] < dist[last][ret[0]] \
+            or (dist[last][ret[0]] == dist[last][u] and dist[v][depot] < dist[ret[1]][depot]):
                 ret = (u, v, id)
-    elif rule == 1:
+    elif rule == 1:  # far
         for id in rest:
             e = requirements[id]
             if e[3] > allowance:
                 continue
             u, v = e[0], e[1]
-            if dist[depot][u] < dist[depot][v]:
+            if (dist[last][v] < dist[last][u]):
                 u, v = v, u
-            if not ret or dist[depot][v] < dist[depot][ret[1]]:
+            if not ret or dist[last][u] < dist[last][ret[0]] \
+            or (dist[last][ret[0]] == dist[last][u] and dist[v][depot] > dist[ret[1]][depot]):
                 ret = (u, v, id)
     elif rule == 2:
-        if allowance > capacity*2:
-            ret = get_next(last, allowance, rest, 0)
-        else:
+        if allowance > capacity/2:
             ret = get_next(last, allowance, rest, 1)
+        else:
+            ret = get_next(last, allowance, rest, 0)
     elif rule == 3:
         if allowance > capacity*2/3 or allowance < capacity/3:
-            ret = get_next(last, allowance, rest, 1)
-        else:
             ret = get_next(last, allowance, rest, 0)
+        else:
+            ret = get_next(last, allowance, rest, 1)
+    elif rule == 4:
+        if allowance > capacity*3/4 or allowance < capacity/4:
+            ret = get_next(last, allowance, rest, 0)
+        else:
+            ret = get_next(last, allowance, rest, 1)
+            
+    elif rule == 5:  # close
+        for id in rest:
+            e = requirements[id]
+            if e[3] > allowance:
+                continue
+            u, v = e[0], e[1]
+            if (dist[last][v] < dist[last][u]):
+                u, v = v, u
+            if not ret or dist[last][u] < dist[last][ret[0]] \
+            or (dist[ret[1]][depot]-dist[v][depot] > dist[last][u]-dist[last][ret[0]]):
+                ret = (u, v, id)
+    elif rule == 6:  # far
+        for id in rest:
+            e = requirements[id]
+            if e[3] > allowance:
+                continue
+            u, v = e[0], e[1]
+            if (dist[last][v] < dist[last][u]):
+                u, v = v, u
+            if not ret or dist[last][u] < dist[last][ret[0]] \
+            or (dist[v][depot]-dist[ret[1]][depot] > dist[last][u]-dist[last][ret[0]]):
+                ret = (u, v, id)
+    elif rule == 7:
+        if allowance > capacity/2:
+            ret = get_next(last, allowance, rest, 6)
+        else:
+            ret = get_next(last, allowance, rest, 5)
+    elif rule == 8:
+        if allowance > capacity*2/3 or allowance < capacity/3:
+            ret = get_next(last, allowance, rest, 5)
+        else:
+            ret = get_next(last, allowance, rest, 6)
+    elif rule == 9:
+        if allowance > capacity*3/4 or allowance < capacity/4:
+            ret = get_next(last, allowance, rest, 5)
+        else:
+            ret = get_next(last, allowance, rest, 6)
+            
     return ret
 
 def path_scan(rule):
@@ -146,23 +194,15 @@ def path_scan(rule):
         return None
     solution.update()
     return solution
-
 best = Solution()
 pool = []
-for rule in range(3):
+for rule in range(8):
     solution = path_scan(rule)
-    # print(str(rule)+':\n', solution, '\n')
     if not solution:
         continue
     pool.append(solution)
     if solution.cost < best.cost:
         best = solution
-
-def generate(n):
-    for _ in range(n):
-        solution = Solution()
-        
-    return NotImplementedError
 
 def mutex(solution, type):
     
@@ -175,5 +215,22 @@ def reproduce(death_rate, survive_rate):
 def selection(disaster_rate, survive_rate, K):
     
     return NotImplementedError
+
+class MyThread(threading.Thread):
+    def generate(n):
+        for _ in range(n):
+            solution = Solution()
+            
+        return NotImplementedError
+    
+    def __init__(self, id, micro, K, pool):
+        self.id = id
+        self.micro = micro
+        self.K = K
+        self.pool = pool
+        
+    def run(self):
+        
+        return NotImplementedError
 
 print(best)
