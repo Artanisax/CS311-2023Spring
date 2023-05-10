@@ -7,9 +7,8 @@ import numpy as np
 # idx = np.sort(idx)
 # print(idx, idx[1:6:2])
 
-edges = np.array([(0,0) for _ in range(10)])
+edge = (1, 2, 3, 4)
 
-edges[0] = (1, 1)
-edges[2] = (0, 3)
+u, v = edge[0:2]
 
-print(edges)
+print(u, v)

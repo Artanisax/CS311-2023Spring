@@ -105,7 +105,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0], e[1]
+            u, v = e[0:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
@@ -116,7 +116,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0], e[1]
+            u, v = e[0:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
@@ -154,7 +154,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0], e[1]
+            u, v = e[0:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or dist[last][u] < dist[last][ret[0]] \
@@ -181,7 +181,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0], e[1]
+            u, v = e[0:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if (d+e[3])/(cost+dist[last][u]+e[2]) > p:
@@ -192,7 +192,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0], e[1]
+            u, v = e[0:2]
             if dist[last][v]+dist[u][depot] < dist[last][u]+dist[v][depot]:
                 u, v = v, u
             if (d+e[3])/(cost+dist[last][u]+e[2]+dist[v][depot]) > p:
@@ -212,7 +212,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0], e[1]
+            u, v = e[0:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or e[3] < requirements[ret[2]][3] \
@@ -223,7 +223,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             e = requirements[id]
             if e[3] > allowance:
                 continue
-            u, v = e[0], e[1]
+            u, v = e[0:2]
             if dist[last][v] < dist[last][u]:
                 u, v = v, u
             if not ret or e[3] > requirements[ret[2]][3] \
@@ -262,7 +262,7 @@ for rule in range(16):
 
 class MyThread(threading.Thread):
     
-    def generate(n):
+    def generate(n):  # random solution (unguaranteed)
         ret = []
         for _ in range(n):
             solution = Solution()
@@ -284,9 +284,16 @@ class MyThread(threading.Thread):
             ret.append(solution)
         return ret
 
-    def mutex(solution, type):
+    def mutex(solution, type, rate):
+        if np.random.rand() > rate:
+            return solution
         if type == 0:  # reverse a single edge
-            
+            idx = np.random.randint(0, vehicles)
+            route = solution.routes[idx]
+            if not route:
+                return solution
+            idx = np.random.randint(0, len(route))
+            u, v = edge[0:2]
             return NotImplementedError
         elif type == 1:  # swap 2 edges in one route
             
