@@ -246,9 +246,8 @@ def path_scan(rule):
             route.append(e)
             rest.remove(e[2])
             u = e[1]
-        solution.routes.append(route)
-        if not rest:
-            break
+    if rest:
+        return None
     solution.refresh()
     return solution
 
