@@ -64,6 +64,12 @@ class Solution:
         s += '\nq '+str(self.cost)
         return s
 
+    def copy(self):
+        solution = Solution()
+        solution.routes = self.routes.copy()
+        solution.cost = self.cost
+        return solution
+
     def refresh(self):
         self.cost = 0
         for route in self.routes:
@@ -261,6 +267,7 @@ for rule in range(16):
     pool.append(solution)
     if solution.cost < best.cost:
         best = solution
+best = best.copy()
 
 class Population():
     def __init__(self, id, K, pool, micro=1):
@@ -330,10 +337,10 @@ class Population():
     
 population = Population(0, 100, pool)
 
-rand_sol = population.generate(64)
+rand_sol = population.generate(524288)
 
 for solution in rand_sol:
-    if solution.cost != INT_MAX:
+    if solution.cost <= best.cost:
         print(solution)
 
 print(best)
