@@ -10,6 +10,7 @@ start_time = time.time()
 
 TIME_BUFFER = 1.2
 INT_MAX = (2**31)-1
+MUTEX_TYPE = 5
 
 # input
 data = sys.argv[1]
@@ -272,11 +273,12 @@ for rule in range(16):
 best = best.copy()
 
 class Population():
-    def __init__(self, id, K, pool, micro=1):
+    def __init__(self, id, K, pool, rates, micro=1):
         threading.Thread.__init__(self)
         self.id = id
         self.K = K
         self.pool = pool
+        self.rates = rates
         self.micro = micro
     
     def generate(self, n):  # random solution (unguaranteed)
@@ -285,7 +287,7 @@ class Population():
             solution = Solution()
             edges = []
             idx = np.random.randint(0, len(self.pool))
-            num = len(self.pool[idx].routes)
+            num = min(required_edges, len(self.pool[idx].routes))
             for i in range(required_edges):
                 u, v = requirements[i][0], requirements[i][1]
                 if np.random.rand() < 0.5:
@@ -303,14 +305,14 @@ class Population():
             ret.append(solution)
         return ret
 
-    def mutex(self, solution, type, rate):
-        if np.random.rand() > rate*self.micro:
+    def mutex(self, solution, type):
+        if np.random.rand() > self.rates[type]*self.micro:
             return
         if type == 0:  # reverse a single edge
             idx = np.random.randint(0, len(solution.routes))
             route = solution.routes[idx]
             if not route:
-                return solution
+                return
             idx = np.random.randint(0, len(route))
             edge = route[idx]
             route[idx] = (edge[1], edge[0], edge[2])
@@ -318,15 +320,31 @@ class Population():
             idx = np.random.randint(0, len(solution.routes))
             route = solution.routes[idx]
             if len(route) < 2:
-                return solution
+                return
             idx = np.random.randint(0, len(route), 2)
             route[idx[0]], route[idx[1]] = route[idx[1]], route[idx[0]]
         elif type == 2:  # move one edge from a route to another
-            
-            return NotImplementedError
+            routes = solution.routes
+            idx = np.random.randint(0, len(routes), 2)
+            route = (routes[idx[0]], routes[idx[1]])
+            if not route[0]:
+                return
+            idx = np.random.randint(0, len(route[0]))
+            edge = route[0][idx]
+            route[0].pop(idx)
+            idx = np.random.randint(0, len(route[1])+1)
+            route[1].insert(idx, edge)
         elif type == 3:  # swap 2 edges from different routes
-            
-            return NotImplementedError
+            routes = solution.routes
+            idx = np.random.randint(0, len(routes), 2)
+            route = (routes[idx[0]], routes[idx[1]])
+            if not route[0] or not route[0]:
+                return
+            idx = (np.random.randint(0, len(route[0])), 
+                   np.random.randint(0, len(route[1])))
+            route[0][idx[0]], route[1][idx[1]] = route[1][idx[1]], route[0][idx[0]]
+        elif type == 4:  # add an empty route
+            solution.routes.append([])
         solution.refresh()
 
     def reproduce(self, death_rate, survive_rate):
@@ -337,13 +355,13 @@ class Population():
     
         return NotImplementedError
     
-population = Population(0, 100, pool)
+population = Population(0, 2048, pool, (0.75, 0.8, 0.7, 0.6, 0.02))
 
 # rand_sol = population.generate(524288)
 
-# best = Solution()
-# for solution in rand_sol:
-#     if solution.cost <= best.cost:
-#         best = solution
+for _ in range(64):
+    solution = best.copy()
+    population.mutex(solution, np.random.randint(0, MUTEX_TYPE-1))
+    print(solution)
 
 print(best)
