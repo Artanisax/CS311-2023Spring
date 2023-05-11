@@ -9,15 +9,15 @@ import numpy as np
 start_time = time.time()
 
 TIME_BUFFER = 1
-INT_MAX = np.iinfo(int).max
+INT_MAX = (2**31)-1
 
-input
+# input
 data = sys.argv[1]
 termination = int(sys.argv[3])
 seed = int(sys.argv[5])
 
 random.seed(seed)
-np.random.seed(seed)
+np.random.seed(random.randint(0, INT_MAX))
 
 content = []
 with open(data) as f:
@@ -235,8 +235,8 @@ def path_scan(rule):
     solution = Solution()
     rest = [i for i in range(required_edges)]
     while True:
-        u, w, c = 0, 0, 0
         route = []
+        u, w, c = 0, 0, 0
         while True:
             e = get_next(u, capacity-w, rest, rule, c)
             if not e:
@@ -246,6 +246,9 @@ def path_scan(rule):
             route.append(e)
             rest.remove(e[2])
             u = e[1]
+        solution.routes.append(route)
+        if not rest:
+            break
     if rest:
         return None
     solution.refresh()
@@ -255,8 +258,6 @@ best = Solution()
 pool = []
 for rule in range(16):
     solution = path_scan(rule)
-    if not solution:
-        continue
     pool.append(solution)
     if solution.cost < best.cost:
         best = solution
