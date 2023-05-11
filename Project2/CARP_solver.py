@@ -8,7 +8,7 @@ import numpy as np
 
 start_time = time.time()
 
-TIME_BUFFER = 1
+TIME_BUFFER = 1.2
 INT_MAX = (2**31)-1
 
 # input
@@ -67,6 +67,8 @@ class Solution:
     def copy(self):
         solution = Solution()
         solution.routes = self.routes.copy()
+        for i in range(len(self.routes)):
+            solution.routes[i] = self.routes[i].copy()
         solution.cost = self.cost
         return solution
 
@@ -337,10 +339,11 @@ class Population():
     
 population = Population(0, 100, pool)
 
-rand_sol = population.generate(524288)
+# rand_sol = population.generate(524288)
 
-for solution in rand_sol:
-    if solution.cost <= best.cost:
-        print(solution)
+# best = Solution()
+# for solution in rand_sol:
+#     if solution.cost <= best.cost:
+#         best = solution
 
 print(best)

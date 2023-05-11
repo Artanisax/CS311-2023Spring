@@ -7,4 +7,11 @@ import numpy as np
 # idx = np.sort(idx)
 # print(idx, idx[1:6:2])
 
-print(len(None))
+ls = [[(1, 2), (1, 2), (1, 2)], [(0, 0), (0, 0)]]
+
+t = ls.copy()
+for i in range(len(t)):
+    t[i] = ls[i].copy()
+    t[i][0] = (-1, -1)
+
+print(ls, t)
