@@ -52,12 +52,11 @@ for line in table:
         requirements.append((u, v, w, d))
 requirements = np.array(requirements, dtype=int)
 
-INIT_LIFE = max(int(np.sqrt(required_edges)), 2)
 class Solution:
     def __init__(self):
         self.routes = []
         self.cost = INT_MAX
-        self.life = INIT_LIFE
+        self.life = required_edges
     
     def __lt__(self, other):
         if self.life:
@@ -317,12 +316,12 @@ class Population():
 
     def mutate(self, solution, type):
         if np.random.rand() > self.rates[type]*self.micro:
-            return 0
+            return
         if type == 0:  # reverse a single edge
             idx = np.random.randint(0, len(solution.routes))
             route = solution.routes[idx]
             if not route:
-                return 0
+                return
             idx = np.random.randint(0, len(route))
             edge = route[idx]
             route[idx] = (edge[1], edge[0], edge[2])
@@ -330,7 +329,7 @@ class Population():
             idx = np.random.randint(0, len(solution.routes))
             route = solution.routes[idx]
             if len(route) < 2:
-                return 0
+                return
             idx = np.random.randint(0, len(route), 2)
             route[idx[0]], route[idx[1]] = route[idx[1]], route[idx[0]]
         elif type == 2:  # move one edge from a route to another
@@ -338,7 +337,7 @@ class Population():
             idx = np.random.randint(0, len(routes), 2)
             route = (routes[idx[0]], routes[idx[1]])
             if not route[0]:
-                return 0
+                return
             idx = np.random.randint(0, len(route[0]))
             edge = route[0][idx]
             route[0].pop(idx)
@@ -349,23 +348,22 @@ class Population():
             idx = np.random.randint(0, len(routes), 2)
             route = (routes[idx[0]], routes[idx[1]])
             if not route[0] or not route[1]:
-                return 0
+                return
             idx = (np.random.randint(0, len(route[0])), 
                    np.random.randint(0, len(route[1])))
             route[0][idx[0]], route[1][idx[1]] = route[1][idx[1]], route[0][idx[0]]
         elif type == 4:  # add an empty route
             solution.routes.append([])
         solution.refresh()
-        return 1
 
     def reproduce(self, death_rate):
         old_pool = self.pool.copy()
         for parent in old_pool:
             if not parent.life:
                 continue
-            for _ in range(2):
+            for _ in range(3):
                 child = parent.copy()
-                t = np.random.randint(1, 3)
+                t = np.random.randint(1, 4)
                 for _ in range(t):
                     self.mutate(child, np.random.randint(0, MUTATION_TYPE))
                 if child.cost == INT_MAX and np.random.rand() < death_rate:
@@ -380,7 +378,7 @@ class Population():
         if len(self.pool) < self.K:
             return
         self.pool.sort()
-        self.pool = self.pool[:28]
+        self.pool = self.pool[:32]
     
 p = Population(0, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2))
 
