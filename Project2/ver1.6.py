@@ -11,7 +11,7 @@ def runtime():
     return time.time()-start_time
 
 
-TIME_BUFFER = 0.7
+TIME_BUFFER = 1.2
 INT_MAX = (2**31)-1
 
 # input
@@ -321,7 +321,7 @@ class Population():
         return ret
 
     def mutate(self, solution, type):
-        if np.random.rand() > self.rates[type]*self.micro:
+        if np.random.rand() > self.rates[type]**self.micro:
             return 0
         if type == 0:  # reverse a single edge
             idx = np.random.randint(0, len(solution.routes))
@@ -389,26 +389,24 @@ class Population():
     
 p = Population(0, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2))
 
+flag = 5
+last = 0
 while termination-(runtime()) > TIME_BUFFER:
     p.reproduce(0.12)
     p.selection()
+    if runtime() >= flag:
+        # print(flag, ':')
+        # print(p.best)
+        if p.best.cost == last:
+            p.micro *= 0.9
+            p.restart()
+            last = 0
+        else:
+            last = p.best.cost
+        flag += 15
 
 if p.best.cost < best.cost:
     best = p.best
 print(best)
 
 # print(runtime())
-
-class MyThread(threading.Thread):
-    def __init__(self, K, pool, rates, death_rate, micro=1):
-        self.death_rate = death_rate
-        self.population = Population(K, pool, rates, micro)
-        
-    def run(self):
-        while termination-(runtime()) > TIME_BUFFER:
-            self.population.reproduce(self.death_rate)
-            self.population.selection()
-            
-threads = []
-for i in range(8):
-    threads.append()

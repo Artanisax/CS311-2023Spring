@@ -1,7 +1,7 @@
 import subprocess
 import time
 
-solver = 'CARP_solver.py'
+solver = 'ver1.6.py'
 data = 'egl-e1-A.dat'
 termination = 60
 seed = 114514
