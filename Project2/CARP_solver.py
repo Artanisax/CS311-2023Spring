@@ -53,6 +53,12 @@ class Solution:
     def __init__(self):
         self.routes = []
         self.cost = INT_MAX
+        self.life = required_edges
+    
+    def __lt__(self, other):
+        if self.life:
+            return not other.life or self.cost < other.cost
+        return False
     
     def __str__(self):
         s = 's '
@@ -264,13 +270,12 @@ def path_scan(rule):
     return solution
 
 best = Solution()
-pool = []
+init_pool = []
 for rule in range(16):
     solution = path_scan(rule)
-    pool.append(solution)
+    init_pool.append(solution)
     if solution.cost < best.cost:
         best = solution
-best = best.copy()
 
 class Population():
     def __init__(self, id, K, pool, rates, micro=1):
@@ -280,6 +285,7 @@ class Population():
         self.pool = pool
         self.rates = rates
         self.micro = micro
+        self.best = Solution()
     
     def generate(self, n):  # random solution (unguaranteed)
         ret = []
@@ -338,7 +344,7 @@ class Population():
             routes = solution.routes
             idx = np.random.randint(0, len(routes), 2)
             route = (routes[idx[0]], routes[idx[1]])
-            if not route[0] or not route[0]:
+            if not route[0] or not route[1]:
                 return
             idx = (np.random.randint(0, len(route[0])), 
                    np.random.randint(0, len(route[1])))
@@ -347,14 +353,34 @@ class Population():
             solution.routes.append([])
         solution.refresh()
 
-    def reproduce(self, death_rate, survive_rate):
-        
-        return NotImplementedError
+    def reproduce(self, death_rate):
+        old_size = len(self.pool)
+        for parent in self.pool:
+            if not parent.life:
+                continue
+            for _ in range(3):
+                child = parent.copy()
+                for _ in range(np.random.randint(0, required_edges)):
+                    self.mutate(child, np.random.randint(0, MUTATION_TYPE))
+                if child.cost == INT_MAX and np.random.rand() < death_rate:
+                    continue
+                child.refresh()
+                if child.cost < self.best.cost:
+                    self.best = child
+                self.pool.append(child)
+            parent.life -= 1
 
-    def selection(self, disaster_rate, survive_rate, K):
-    
+    def selection(self):
+        if len(self.pool) < self.K:
+            return
+        self.pool.sort()
+        self.pool = self.pool[:32]
         return NotImplementedError
     
-population = Population(0, 2048, pool, (0.75, 0.8, 0.7, 0.6, 0.02))
+p = Population(0, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.02))
+
+while termination-(time.time()-start_time) > TIME_BUFFER:
+    p.reproduce(0.12)
+    p.selection()
 
 print(best)
