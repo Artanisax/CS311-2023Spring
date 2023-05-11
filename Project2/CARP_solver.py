@@ -7,6 +7,9 @@ import threading
 import numpy as np
 
 start_time = time.time()
+def runtime():
+    return time.time()-start_time
+
 
 TIME_BUFFER = 1.2
 INT_MAX = (2**31)-1
@@ -354,13 +357,14 @@ class Population():
         solution.refresh()
 
     def reproduce(self, death_rate):
-        old_size = len(self.pool)
-        for parent in self.pool:
+        old_pool = self.pool.copy()
+        for parent in old_pool:
             if not parent.life:
                 continue
             for _ in range(3):
                 child = parent.copy()
-                for _ in range(np.random.randint(0, required_edges)):
+                t = np.random.randint(0, required_edges)
+                for _ in range(t):
                     self.mutate(child, np.random.randint(0, MUTATION_TYPE))
                 if child.cost == INT_MAX and np.random.rand() < death_rate:
                     continue
@@ -369,18 +373,19 @@ class Population():
                     self.best = child
                 self.pool.append(child)
             parent.life -= 1
-
+            
     def selection(self):
         if len(self.pool) < self.K:
             return
         self.pool.sort()
         self.pool = self.pool[:32]
-        return NotImplementedError
     
 p = Population(0, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.02))
 
-while termination-(time.time()-start_time) > TIME_BUFFER:
+while termination-(runtime()) > TIME_BUFFER:
     p.reproduce(0.12)
     p.selection()
 
 print(best)
+
+# print(runtime())
