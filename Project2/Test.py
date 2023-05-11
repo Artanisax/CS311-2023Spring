@@ -3,8 +3,8 @@ import time
 
 solver = 'CARP_solver.py'
 data = 'egl-s1-A.dat'
-termination = 6
-seed = int(time.time())
+termination = 20
+seed = 114514
 
 solution = subprocess.run(['python', solver, data, '-t', str(termination), '-s', str(seed)])
 

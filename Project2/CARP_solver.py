@@ -386,7 +386,6 @@ while termination-(runtime()) > TIME_BUFFER:
     p.reproduce(0.12)
     p.selection()
 
-print(best)
 if p.best.cost < best.cost:
     best = p.best
 print(best)
