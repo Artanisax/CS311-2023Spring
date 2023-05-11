@@ -50,7 +50,7 @@ requirements = np.array(requirements, dtype=int)
 
 class Solution:
     def __init__(self):
-        self.routes = [[] for _ in range(vehicles)]
+        self.routes = []
         self.cost = INT_MAX
     
     def __str__(self):
@@ -64,7 +64,7 @@ class Solution:
         s += '\nq '+str(self.cost)
         return s
 
-    def update(self):
+    def refresh(self):
         self.cost = 0
         for route in self.routes:
             u, w = depot, 0
@@ -234,8 +234,9 @@ def get_next(last, allowance, rest, rule, cost=-1):
 def path_scan(rule):
     solution = Solution()
     rest = [i for i in range(required_edges)]
-    for route in solution.routes:
+    while True:
         u, w, c = 0, 0, 0
+        route = []
         while True:
             e = get_next(u, capacity-w, rest, rule, c)
             if not e:
@@ -245,9 +246,10 @@ def path_scan(rule):
             route.append(e)
             rest.remove(e[2])
             u = e[1]
-    if rest:
-        return None
-    solution.update()
+        solution.routes.append(route)
+        if not rest:
+            break
+    solution.refresh()
     return solution
 
 best = Solution()
@@ -280,7 +282,7 @@ class MyThread(threading.Thread):
                 solution.routes[i] = edges[l:idx[i]]
                 l = idx[i]
             solution.routes[vehicles-1] = edges[l:required_edges]
-            solution.update()
+            solution.refresh()
             ret.append(solution)
         return ret
 
@@ -293,9 +295,15 @@ class MyThread(threading.Thread):
             if not route:
                 return solution
             idx = np.random.randint(0, len(route))
-            u, v = edge[1::-1]
-            return NotImplementedError
+            edge = route[idx]
+            route[idx] = (edge[1], edge[0], edge[2])
+            solution.refresh()
+            return solution
         elif type == 1:  # swap 2 edges in one route
+            idx = np.random.randint(0, vehicles)
+            route = solution.routes[idx]
+            if route[idx] == None:
+                return solution
             
             return NotImplementedError
         elif type == 2:  # move one edge from a route to another

@@ -6,9 +6,3 @@ import numpy as np
 # idx = np.random.randint(0, num, 8)
 # idx = np.sort(idx)
 # print(idx, idx[1:6:2])
-
-edge = (1, 2, 3, 4)
-
-u, v = edge[:2]
-
-print(u, v)
