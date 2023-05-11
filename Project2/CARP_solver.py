@@ -363,7 +363,7 @@ class Population():
                 continue
             for _ in range(3):
                 child = parent.copy()
-                t = np.random.randint(0, required_edges)
+                t = np.random.randint(1, 4)
                 for _ in range(t):
                     self.mutate(child, np.random.randint(0, MUTATION_TYPE))
                 if child.cost == INT_MAX and np.random.rand() < death_rate:
@@ -386,7 +386,8 @@ while termination-(runtime()) > TIME_BUFFER:
     p.reproduce(0.12)
     p.selection()
 
-if p.best.cost < best:
+print(best)
+if p.best.cost < best.cost:
     best = p.best
 print(best)
 
