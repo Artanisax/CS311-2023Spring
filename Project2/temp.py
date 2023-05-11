@@ -6,3 +6,5 @@ import numpy as np
 # idx = np.random.randint(0, num, 8)
 # idx = np.sort(idx)
 # print(idx, idx[1:6:2])
+
+print(len(None))
