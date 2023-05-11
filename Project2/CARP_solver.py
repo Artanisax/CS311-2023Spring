@@ -380,12 +380,14 @@ class Population():
         self.pool.sort()
         self.pool = self.pool[:32]
     
-p = Population(0, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.02))
+p = Population(0, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2))
 
 while termination-(runtime()) > TIME_BUFFER:
     p.reproduce(0.12)
     p.selection()
 
+if p.best.cost < best:
+    best = p.best
 print(best)
 
 # print(runtime())
