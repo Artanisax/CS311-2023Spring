@@ -11,9 +11,8 @@ def runtime():
     return time.time()-start_time
 
 
-TIME_BUFFER = 1.2
+TIME_BUFFER = 0.7
 INT_MAX = (2**31)-1
-MUTATION_TYPE = 5
 
 # input
 data = sys.argv[1]
@@ -67,6 +66,8 @@ class Solution:
     def __str__(self):
         s = 's '
         for route in self.routes:
+            if not route:
+                continue
             s += '0,'
             for e in route:
                 s += '('+str(e[0]+1)+','+str(e[1]+1)+'),'
@@ -281,6 +282,7 @@ for rule in range(16):
     if solution.cost < best.cost:
         best = solution
 
+MUTATION_TYPE = 5
 class Population():
     def __init__(self, id, K, pool, rates, micro=1):
         threading.Thread.__init__(self)
