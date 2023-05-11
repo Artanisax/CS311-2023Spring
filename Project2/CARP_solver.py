@@ -10,7 +10,7 @@ start_time = time.time()
 
 TIME_BUFFER = 1.2
 INT_MAX = (2**31)-1
-MUTEX_TYPE = 5
+MUTATION_TYPE = 5
 
 # input
 data = sys.argv[1]
@@ -305,7 +305,7 @@ class Population():
             ret.append(solution)
         return ret
 
-    def mutex(self, solution, type):
+    def mutate(self, solution, type):
         if np.random.rand() > self.rates[type]*self.micro:
             return
         if type == 0:  # reverse a single edge
@@ -356,12 +356,5 @@ class Population():
         return NotImplementedError
     
 population = Population(0, 2048, pool, (0.75, 0.8, 0.7, 0.6, 0.02))
-
-# rand_sol = population.generate(524288)
-
-for _ in range(64):
-    solution = best.copy()
-    population.mutex(solution, np.random.randint(0, MUTEX_TYPE-1))
-    print(solution)
 
 print(best)
