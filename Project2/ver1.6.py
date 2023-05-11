@@ -295,6 +295,7 @@ class Population():
     
     def restart(self):
         self.pool = self.backup
+        self.best = Solution()
     
     def generate(self, n):  # random solution (unguaranteed)
         ret = []
@@ -395,8 +396,8 @@ while termination-(runtime()) > TIME_BUFFER:
     p.reproduce(0.12)
     p.selection()
     if runtime() >= flag:
-        # print(flag, ':')
-        # print(p.best)
+        if p.best.cost < best.cost:
+            best = p.best
         if p.best.cost == last:
             p.micro *= 0.9
             p.restart()
