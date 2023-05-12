@@ -8,7 +8,7 @@ import numpy as np
 
 TIME_BUFFER = 2.33
 INT_MAX = (2**31)-1
-INIT_LIFE = 2 
+INIT_LIFE = 2
 MUTATION_TYPE = 5
 
 class Info:
@@ -82,7 +82,7 @@ class Population:
         self.pool = self.backup
 
     def mutate(self, solution, type):
-        if np.random.rand() > self.rates[type]*self.micro:
+        if np.random.rand() > self.rates[type]**self.micro:
             return False
         if type == 0:  # reverse a single edge
             idx = np.random.randint(0, len(solution.routes))
@@ -127,29 +127,34 @@ class Population:
     def reproduce(self):
         old_pool = self.pool.copy()
         for parent in old_pool:
-            if not parent.life:
-                continue
-            for _ in range(2):
+            # if not parent.life:
+            #     continue
+            for _ in range(4):
                 child = parent.copy()
-                t = np.random.randint(1, 3)
                 flag = False
-                for _ in range(t):
-                    flag |= self.mutate(child, np.random.randint(0, MUTATION_TYPE))
+                for _ in range(1):
+                    flag |= self.mutate(child, np.random.randint(0, MUTATION_TYPE-1))
+                self.mutate(child, MUTATION_TYPE-1)
                 # if not flag:
                 #     self.mutate(child, np.random.randint(0, MUTATION_TYPE))
-                if child.cost == INT_MAX and np.random.rand() < self.death_rate:
+                if child.cost >= parent.cost and np.random.rand() < self.death_rate:
                     continue
                 child.refresh()
                 if child.cost < self.best.cost:
                     self.best = child
                 self.pool.append(child)
-            parent.life -= 1
+            # parent.life -= 1
+            # if parent.life:
+            #     new_pool.append(parent)
             
     def selection(self):
         if len(self.pool) < self.K:
             return
         self.pool.sort()
-        self.pool = self.pool[:self.size]
+        new_pool = self.pool[:int(2*self.size/3)]
+        random.shuffle(self.pool)
+        new_pool.extend(self.pool[:int(self.size/3)])
+        self.pool = new_pool
 
 # muti-process
 class MyProcess(multiprocessing.Process):
@@ -162,9 +167,13 @@ class MyProcess(multiprocessing.Process):
     def run(self):
         random.seed(self.info.seed)
         np.random.seed(random.randint(0, INT_MAX))
+        cnt = 0
         while self.info.termination-(time.time()-self.info.start_time) > TIME_BUFFER:
             self.population.reproduce()
             self.population.selection()
+            self.population.micro *= 0.99
+            cnt += 1
+        # print(self.name, cnt, self.population.best.cost)
         self.q.put(self.population.best)
 
 if __name__ == '__main__':
@@ -392,49 +401,51 @@ if __name__ == '__main__':
         if solution.cost < best.cost:
             best = solution
     
-    proc_K = [4096,
-              2048,
+    CORE = 8
+    
+    proc_K = [1024,
               1024,
-              4096,
-              2048,
-              4096,
-              2048,
-              8192]
+              1024,
+              1024,
+              1024,
+              1024,
+              1024,
+              1024]
     proc_pool = [init_pool,
                  init_pool,
                  init_pool,
-                 init_pool,
-                 init_pool,
-                 init_pool,
-                 init_pool,
+                 init_pool[5:16],
+                 init_pool[2:5],
+                 init_pool[2:5],
+                 init_pool[2:5],
                  init_pool]
-    proc_rates = [(0.7, 0.9, 0.75, 0.7, 0.15),
-                  (0.7, 0.9, 0.75, 0.7, 0.15),
-                  (0.7, 0.9, 0.75, 0.7, 0.15),
-                  (0.7, 0.9, 0.75, 0.7, 0.15),
-                  (0.7, 0.9, 0.75, 0.7, 0.15),
-                  (0.7, 0.9, 0.75, 0.7, 0.15),
-                  (0.7, 0.9, 0.75, 0.7, 0.15),
-                  (0.7, 0.9, 0.75, 0.7, 0.15)]
-    proc_death_rate = [0.12,
-                       0.12,
-                       0.49,
-                       0.12,
-                       0.12,
-                       0.12,
-                       0.12,
-                       0.23]
-    proc_size = [28,
-                 16,
-                 28,
-                 36,
-                 36,
-                 32,
-                 32,
-                 36]
+    proc_rates = [(0.75, 0.8, 0.85, 0.6, 0.1),
+                  (0.75, 0.8, 0.7, 0.6, 0.1),
+                  (0.7, 0.9, 0.75, 0.7, 0.05),
+                  (0.75, 0.85, 0.75, 0.65, 0.1),
+                  (0.75, 0.8, 0.85, 0.75, 0.1),
+                  (0.75, 0.9, 0.85, 0.9, 0.05),
+                  (0.8, 0.9, 0.75, 0.7, 0.05),
+                  (0.8, 0.9, 0.85, 0.75, 0.05)]
+    proc_death_rate = [0.96,
+                       0.91,
+                       0.92,
+                       0.93,
+                       0.94,
+                       0.95,
+                       0.96,
+                       0.86]
+    proc_size = [61,
+                 78,
+                 64,
+                 69,
+                 21,
+                 44,
+                 37,
+                 49]
     q = multiprocessing.Manager().Queue()
     processes = []
-    for i in range(8):
+    for i in range(CORE):
         processes.append(MyProcess(info,
                                    proc_K[i],
                                    proc_pool[i],
@@ -449,7 +460,6 @@ if __name__ == '__main__':
         proc.join()
     while not q.empty():
         solution = q.get()
-        # print(solution.cost)
         if solution.cost < best.cost:
             best = solution
             

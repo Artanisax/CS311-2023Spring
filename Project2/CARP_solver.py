@@ -171,7 +171,7 @@ class MyProcess(multiprocessing.Process):
         while self.info.termination-(time.time()-self.info.start_time) > TIME_BUFFER:
             self.population.reproduce()
             self.population.selection()
-            # self.population.micro *= 0.99
+            self.population.micro *= 0.99
             cnt += 1
         # print(self.name, cnt, self.population.best.cost)
         self.q.put(self.population.best)
@@ -414,33 +414,33 @@ if __name__ == '__main__':
     proc_pool = [init_pool,
                  init_pool,
                  init_pool,
-                 init_pool[10:16],
+                 init_pool[5:16],
                  init_pool[2:5],
                  init_pool[2:5],
                  init_pool[2:5],
-                 init_pool[2:5]]
+                 init_pool]
     proc_rates = [(0.75, 0.8, 0.85, 0.6, 0.1),
                   (0.75, 0.8, 0.7, 0.6, 0.1),
                   (0.7, 0.9, 0.75, 0.7, 0.05),
-                  (0.75, 0.8, 0.7, 0.6, 0.1),
-                  (0.75, 0.8, 0.7, 0.6, 0.1),
-                  (0.75, 0.8, 0.7, 0.6, 0.1),
-                  (0.7, 0.9, 0.75, 0.7, 0.05),
-                  (0.7, 0.9, 0.75, 0.7, 0.05)]
+                  (0.75, 0.85, 0.75, 0.65, 0.1),
+                  (0.75, 0.8, 0.85, 0.75, 0.1),
+                  (0.75, 0.9, 0.85, 0.9, 0.05),
+                  (0.8, 0.9, 0.75, 0.7, 0.05),
+                  (0.8, 0.9, 0.85, 0.75, 0.05)]
     proc_death_rate = [0.96,
-                       0.86,
-                       0.86,
-                       0.86,
-                       0.86,
-                       0.86,
-                       0.86,
+                       0.91,
+                       0.92,
+                       0.93,
+                       0.94,
+                       0.95,
+                       0.96,
                        0.86]
     proc_size = [61,
-                 63,
+                 78,
                  64,
                  69,
                  21,
-                 28,
+                 44,
                  37,
                  49]
     q = multiprocessing.Manager().Queue()
