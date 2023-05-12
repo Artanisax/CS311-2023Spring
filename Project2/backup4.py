@@ -129,7 +129,7 @@ class Population:
         for parent in old_pool:
             # if not parent.life:
             #     continue
-            for _ in range(np.random.randint(5, 7)):
+            for _ in range(4):
                 child = parent.copy()
                 flag = False
                 for _ in range(1):
@@ -150,12 +150,10 @@ class Population:
     def selection(self):
         if len(self.pool) < self.K:
             return
-        old_pool = self.pool
-        old_pool.sort()
-        new_pool = old_pool[:int(2*self.size/3)]
-        old_pool = old_pool[int(2*self.size/3):]
-        random.shuffle(old_pool)
-        new_pool.extend(old_pool[:int(self.size/3)])
+        self.pool.sort()
+        new_pool = self.pool[:int(2*self.size/3)]
+        random.shuffle(self.pool)
+        new_pool.extend(self.pool[:int(self.size/3)])
         self.pool = new_pool
 
 # muti-process
@@ -170,26 +168,17 @@ class MyProcess(multiprocessing.Process):
         random.seed(self.info.seed)
         np.random.seed(random.randint(0, INT_MAX))
         cnt = 0
-        flag = 5
+        flag = 10
         while self.info.termination-(time.time()-self.info.start_time) > TIME_BUFFER:
             self.population.reproduce()
             self.population.selection()
             # self.population.micro *= 0.99
-            
-            # cnt += 1
-            # if time.time()-self.info.start_time >= flag:
-            #     num = 0
-            #     for solution in self.population.pool:
-            #         if solution.cost == self.population.best.cost:
-            #             num += 1
-            #     print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
-            #     flag += 5
-        # num = 0
-        # for solution in self.population.pool:
-        #     if solution.cost == self.population.best.cost:
-        #         num += 1
-        # print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
-        # self.q.put(self.population.best)
+        #     cnt += 1
+        #     if time.time()-self.info.start_time >= flag:
+        #         print(self.name, cnt, self.population.best.cost)
+        #         flag += 10
+        # print(self.name, cnt, self.population.best.cost)
+        self.q.put(self.population.best)
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -442,12 +431,12 @@ if __name__ == '__main__':
                   (0.75, 0.9, 0.85, 0.9, 0.05),
                   (0.8, 0.9, 0.75, 0.7, 0.05),
                   (0.93, 0.93, 0.93, 0.93, 0.07)]
-    proc_death_rate = [0.94,
+    proc_death_rate = [0.96,
                        0.91,
                        0.92,
                        0.93,
                        0.94,
-                       0.9,
+                       0.95,
                        0.96,
                        0.86]
     proc_size = [61,

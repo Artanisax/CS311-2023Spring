@@ -129,7 +129,7 @@ class Population:
         for parent in old_pool:
             # if not parent.life:
             #     continue
-            for _ in range(4):
+            for _ in range(9):
                 child = parent.copy()
                 flag = False
                 for _ in range(1):
@@ -150,10 +150,12 @@ class Population:
     def selection(self):
         if len(self.pool) < self.K:
             return
-        self.pool.sort()
-        new_pool = self.pool[:int(2*self.size/3)]
-        random.shuffle(self.pool)
-        new_pool.extend(self.pool[:int(self.size/3)])
+        old_pool = self.pool
+        old_pool.sort()
+        new_pool = old_pool[:int(2*self.size/3)]
+        old_pool = old_pool[int(2*self.size/3):]
+        random.shuffle(old_pool)
+        new_pool.extend(old_pool[:int(self.size/3)])
         self.pool = new_pool
 
 # muti-process
@@ -168,12 +170,25 @@ class MyProcess(multiprocessing.Process):
         random.seed(self.info.seed)
         np.random.seed(random.randint(0, INT_MAX))
         cnt = 0
+        flag = 5
         while self.info.termination-(time.time()-self.info.start_time) > TIME_BUFFER:
             self.population.reproduce()
             self.population.selection()
-            self.population.micro *= 0.99
+            # self.population.micro *= 0.99
+            
             cnt += 1
-        # print(self.name, cnt, self.population.best.cost)
+            # if time.time()-self.info.start_time >= flag:
+            #     num = 0
+            #     for solution in self.population.pool:
+            #         if solution.cost == self.population.best.cost:
+            #             num += 1
+            #     print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
+            #     flag += 5
+        # num = 0
+        # for solution in self.population.pool:
+        #     if solution.cost == self.population.best.cost:
+        #         num += 1
+        # print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
         self.q.put(self.population.best)
 
 if __name__ == '__main__':
@@ -403,36 +418,36 @@ if __name__ == '__main__':
     
     CORE = 8
     
-    proc_K = [1024,
-              1024,
-              1024,
-              1024,
-              1024,
-              1024,
-              1024,
-              1024]
+    proc_K = [666,
+              666,
+              666,
+              666,
+              666,
+              666,
+              666,
+              666]
     proc_pool = [init_pool,
                  init_pool,
                  init_pool,
                  init_pool[5:16],
                  init_pool[2:5],
                  init_pool[2:5],
-                 init_pool[2:5],
+                 init_pool[2:9],
                  init_pool]
-    proc_rates = [(0.75, 0.8, 0.85, 0.6, 0.1),
-                  (0.75, 0.8, 0.7, 0.6, 0.1),
-                  (0.7, 0.9, 0.75, 0.7, 0.05),
-                  (0.75, 0.85, 0.75, 0.65, 0.1),
-                  (0.75, 0.8, 0.85, 0.75, 0.1),
+    proc_rates = [(0.86, 0.8, 0.85, 0.9, 0.05),
+                  (0.8, 0.9, 0.75, 0.65, 0.05),
+                  (0.78, 0.9, 0.8, 0.7, 0.02),
+                  (0.75, 0.85, 0.75, 0.65, 0.05),
+                  (0.75, 0.8, 0.85, 0.75, 0.05),
                   (0.75, 0.9, 0.85, 0.9, 0.05),
                   (0.8, 0.9, 0.75, 0.7, 0.05),
-                  (0.8, 0.9, 0.85, 0.75, 0.05)]
-    proc_death_rate = [0.96,
+                  (0.93, 0.93, 0.93, 0.93, 0.07)]
+    proc_death_rate = [0.94,
                        0.91,
                        0.92,
                        0.93,
                        0.94,
-                       0.95,
+                       0.9,
                        0.96,
                        0.86]
     proc_size = [61,
