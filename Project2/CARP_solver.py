@@ -284,8 +284,7 @@ for rule in range(16):
 
 MUTATION_TYPE = 5
 class Population():
-    def __init__(self, id, K, pool, rates, micro=1):
-        self.id = id
+    def __init__(self, K, pool, rates, micro=1):
         self.K = K
         self.pool = pool
         self.backup = pool.copy()
@@ -387,20 +386,52 @@ class Population():
         self.pool.sort()
         self.pool = self.pool[:28]
     
-p = Population(0, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2))
+p = Population(4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2))
 
+# single-thread
 while termination-(runtime()) > TIME_BUFFER:
     p.reproduce(0.12)
     p.selection()
 
 if p.best.cost < best.cost:
     best = p.best
-print(best)
 
-# print(runtime())
-
+# muti-thread
+thread_pool = [init_pool[0:2],
+               init_pool[2:3],
+               init_pool[3:5],
+               init_pool[5:8],
+               init_pool[8:10],
+               init_pool[10:12],
+               init_pool[12:14],
+               init_pool[14:16]]
+thread_rates = [(0.75, 0.8, 0.7, 0.6, 0.2),
+                (0.75, 0.8, 0.7, 0.6, 0.2),
+                (0.75, 0.8, 0.7, 0.6, 0.2),
+                (0.75, 0.8, 0.7, 0.6, 0.2),
+                (0.75, 0.8, 0.7, 0.6, 0.2),
+                (0.75, 0.8, 0.7, 0.6, 0.2),
+                (0.75, 0.8, 0.7, 0.6, 0.2),
+                (0.75, 0.8, 0.7, 0.6, 0.2)]
+thread_death_rate = [0.12,
+                     0.12,
+                     0.12,
+                     0.12,
+                     0.12,
+                     0.12,
+                     0.12,
+                     0.49]
+thread_K = [4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096,
+            4096]
 class MyThread(threading.Thread):
     def __init__(self, K, pool, rates, death_rate, micro=1):
+        threading.Thread.__init__(self)
         self.death_rate = death_rate
         self.population = Population(K, pool, rates, micro)
         
@@ -411,4 +442,18 @@ class MyThread(threading.Thread):
             
 threads = []
 for i in range(8):
-    threads.append()
+    threads.append(MyThread(thread_K[i],
+                            thread_pool[i],
+                            thread_rates[i],
+                            thread_death_rate[i]))
+    threads[i].start()
+
+# for t in threads:
+#     t.join()
+#     t_best = t.population.best
+#     if t_best.cost < best.cost:
+#         best = t_best
+        
+print(best)
+
+print(runtime())

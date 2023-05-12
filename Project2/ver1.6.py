@@ -195,6 +195,7 @@ def get_next(last, allowance, rest, rule, cost=-1):
             ret = get_next(last, allowance, rest, 5)
         else:
             ret = get_next(last, allowance, rest, 6)
+            
     elif rule == 10:  # no way back
         d, p = capacity-allowance, 0
         for id in rest:
@@ -390,7 +391,7 @@ class Population():
     
 p = Population(0, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2))
 
-flag = 5
+flag = 20
 last = 0
 while termination-(runtime()) > TIME_BUFFER:
     p.reproduce(0.12)
@@ -404,7 +405,7 @@ while termination-(runtime()) > TIME_BUFFER:
             last = 0
         else:
             last = p.best.cost
-        flag += 15
+        flag += 25
 
 if p.best.cost < best.cost:
     best = p.best
