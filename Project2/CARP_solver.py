@@ -392,74 +392,75 @@ if __name__ == '__main__':
         if solution.cost < best.cost:
             best = solution
     
-    # proc_K = [4096,
-    #           2048,
-    #           2048,
-    #           2048,
-    #           2048,
-    #           2048,
-    #           4096,
-    #           4096]
-    # proc_pool = [init_pool,
-    #             init_pool[0:3],
-    #             init_pool[3:5],
-    #             init_pool[5:8],
-    #             init_pool[8:10],
-    #             init_pool[10:12],
-    #             init_pool[12:14],
-    #             init_pool[14:16]]
-    # proc_rates = [(0.75, 0.8, 0.7, 0.6, 0.2),
-    #               (0.75, 0.8, 0.7, 0.6, 0.2),
-    #               (0.75, 0.8, 0.7, 0.6, 0.2),
-    #               (0.75, 0.8, 0.7, 0.6, 0.2),
-    #               (0.75, 0.8, 0.7, 0.6, 0.2),
-    #               (0.75, 0.8, 0.7, 0.6, 0.2),
-    #               (0.75, 0.8, 0.7, 0.6, 0.2),
-    #               (0.75, 0.8, 0.7, 0.6, 0.2)]
-    # proc_death_rate = [0.12,
-    #                     0.12,
-    #                     0.12,
-    #                     0.12,
-    #                     0.12,
-    #                     0.12,
-    #                     0.12,
-    #                     0.49]
-    # proc_size = [28,
-    #             36,
-    #             36,
-    #             36,
-    #             36,
-    #             36,
-    #             36,
-    #             36]
-    # q = multiprocessing.Manager().Queue()
-    # processes = []
-    # for i in range(8):
-    #     processes.append(MyProcess(info,
-    #                                proc_K[i],
-    #                                proc_pool[i],
-    #                                proc_rates[i],
-    #                                proc_death_rate[i],
-    #                                proc_size[i],
-    #                                q
-    #                                ))
-    #     processes[i].start()
+    proc_K = [4096,
+              2048,
+              1024,
+              4096,
+              2048,
+              4096,
+              2048,
+              8192]
+    proc_pool = [init_pool,
+                 init_pool,
+                 init_pool,
+                 init_pool,
+                 init_pool,
+                 init_pool,
+                 init_pool,
+                 init_pool]
+    proc_rates = [(0.7, 0.9, 0.75, 0.7, 0.15),
+                  (0.7, 0.9, 0.75, 0.7, 0.15),
+                  (0.7, 0.9, 0.75, 0.7, 0.15),
+                  (0.7, 0.9, 0.75, 0.7, 0.15),
+                  (0.7, 0.9, 0.75, 0.7, 0.15),
+                  (0.7, 0.9, 0.75, 0.7, 0.15),
+                  (0.7, 0.9, 0.75, 0.7, 0.15),
+                  (0.7, 0.9, 0.75, 0.7, 0.15)]
+    proc_death_rate = [0.12,
+                       0.12,
+                       0.49,
+                       0.12,
+                       0.12,
+                       0.12,
+                       0.12,
+                       0.23]
+    proc_size = [28,
+                 38,
+                 38,
+                 38,
+                 38,
+                 32,
+                 32,
+                 36]
+    q = multiprocessing.Manager().Queue()
+    processes = []
+    for i in range(8):
+        processes.append(MyProcess(info,
+                                   proc_K[i],
+                                   proc_pool[i],
+                                   proc_rates[i],
+                                   proc_death_rate[i],
+                                   proc_size[i],
+                                   q
+                                   ))
+        processes[i].start()
     
-    # for proc in processes:
-    #     proc.join()
-    # while not q.empty():
-    #     solution = q.get()
-    #     if solution.cost < best.cost:
-    #         best = solution
+    for proc in processes:
+        proc.join()
+    while not q.empty():
+        solution = q.get()
+        print(solution.cost)
+        if solution.cost < best.cost:
+            best = solution
             
     # single-process
-    p = Population(info, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2), 0.12, 28)
-    while termination-(time.time()-start_time) > TIME_BUFFER:
-        p.reproduce()
-        p.selection()
-    if p.best.cost < best.cost:
-        best = p.best
+    # p = Population(info, 4096, init_pool, (0.7, 0.9, 0.75, 0.7, 0.15), 0.12, 28)
+    # while termination-(time.time()-start_time) > TIME_BUFFER:
+    #     p.reproduce()
+    #     p.selection()
+    # if p.best.cost < best.cost:
+    #     best = p.best
     
     print(best)
 
-    print(time.time()-start_time)
+    # print(time.time()-start_time)
