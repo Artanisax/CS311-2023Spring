@@ -184,11 +184,11 @@ class MyProcess(multiprocessing.Process):
             #             num += 1
             #     print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
             #     flag += 5
-        # num = 0
-        # for solution in self.population.pool:
-        #     if solution.cost == self.population.best.cost:
-        #         num += 1
-        # print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
+        num = 0
+        for solution in self.population.pool:
+            if solution.cost == self.population.best.cost:
+                num += 1
+        print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
         self.q.put(self.population.best)
 
 if __name__ == '__main__':
@@ -418,14 +418,14 @@ if __name__ == '__main__':
     
     CORE = 8
     
-    proc_K = [666,
+    proc_K = [888,
               666,
-              666,
-              666,
-              666,
-              666,
-              666,
-              666]
+              888,
+              888,
+              888,
+              888,
+              888,
+              999]
     proc_pool = [init_pool,
                  init_pool,
                  init_pool,

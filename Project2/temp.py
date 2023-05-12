@@ -184,12 +184,12 @@ class MyProcess(multiprocessing.Process):
             #             num += 1
             #     print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
             #     flag += 5
-        # num = 0
-        # for solution in self.population.pool:
-        #     if solution.cost == self.population.best.cost:
-        #         num += 1
-        # print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
-        # self.q.put(self.population.best)
+        num = 0
+        for solution in self.population.pool:
+            if solution.cost == self.population.best.cost:
+                num += 1
+        print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
+        self.q.put(self.population.best)
 
 if __name__ == '__main__':
     start_time = time.time()
