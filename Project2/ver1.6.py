@@ -285,8 +285,7 @@ for rule in range(16):
 
 MUTATION_TYPE = 5
 class Population():
-    def __init__(self, id, K, pool, rates, micro=1):
-        self.id = id
+    def __init__(self, K, pool, rates, micro=1):
         self.K = K
         self.pool = pool
         self.backup = pool.copy()
@@ -389,23 +388,23 @@ class Population():
         self.pool.sort()
         self.pool = self.pool[:28]
     
-p = Population(0, 4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2))
+p = Population(4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2))
 
 flag = 20
 last = 0
 while termination-(runtime()) > TIME_BUFFER:
     p.reproduce(0.12)
     p.selection()
-    if runtime() >= flag:
-        if p.best.cost < best.cost:
-            best = p.best
-        if p.best.cost == last:
-            p.micro *= 0.9
-            p.restart()
-            last = 0
-        else:
-            last = p.best.cost
-        flag += 25
+    # if runtime() >= flag:
+    #     if p.best.cost < best.cost:
+    #         best = p.best
+    #     if p.best.cost == last:
+    #         p.micro *= 0.9
+    #         p.restart()
+    #         last = 0
+    #     else:
+    #         last = p.best.cost
+    #     flag += 25
 
 if p.best.cost < best.cost:
     best = p.best

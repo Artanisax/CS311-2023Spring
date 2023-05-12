@@ -11,7 +11,7 @@ def runtime():
     return time.time()-start_time
 
 
-TIME_BUFFER = 0.7
+TIME_BUFFER = 2.33
 INT_MAX = (2**31)-1
 
 # input
@@ -51,7 +51,7 @@ for line in table:
         requirements.append((u, v, w, d))
 requirements = np.array(requirements, dtype=int)
 
-INIT_LIFE = max(int(np.sqrt(required_edges)), 2)
+INIT_LIFE = 3 # max(int(required_edges**0.5), 2)
 class Solution:
     def __init__(self):
         self.routes = []
@@ -284,11 +284,13 @@ for rule in range(16):
 
 MUTATION_TYPE = 5
 class Population():
-    def __init__(self, K, pool, rates, micro=1):
+    def __init__(self, K, pool, rates, death_rate, size, micro=1):
         self.K = K
         self.pool = pool
         self.backup = pool.copy()
         self.rates = rates
+        self.death_rate = death_rate
+        self.size= size
         self.micro = micro
         self.best = Solution()
     
@@ -321,12 +323,12 @@ class Population():
 
     def mutate(self, solution, type):
         if np.random.rand() > self.rates[type]*self.micro:
-            return 0
+            return False
         if type == 0:  # reverse a single edge
             idx = np.random.randint(0, len(solution.routes))
             route = solution.routes[idx]
             if not route:
-                return 0
+                return False
             idx = np.random.randint(0, len(route))
             edge = route[idx]
             route[idx] = (edge[1], edge[0], edge[2])
@@ -334,7 +336,7 @@ class Population():
             idx = np.random.randint(0, len(solution.routes))
             route = solution.routes[idx]
             if len(route) < 2:
-                return 0
+                return False
             idx = np.random.randint(0, len(route), 2)
             route[idx[0]], route[idx[1]] = route[idx[1]], route[idx[0]]
         elif type == 2:  # move one edge from a route to another
@@ -342,7 +344,7 @@ class Population():
             idx = np.random.randint(0, len(routes), 2)
             route = (routes[idx[0]], routes[idx[1]])
             if not route[0]:
-                return 0
+                return False
             idx = np.random.randint(0, len(route[0]))
             edge = route[0][idx]
             route[0].pop(idx)
@@ -353,16 +355,16 @@ class Population():
             idx = np.random.randint(0, len(routes), 2)
             route = (routes[idx[0]], routes[idx[1]])
             if not route[0] or not route[1]:
-                return 0
+                return False
             idx = (np.random.randint(0, len(route[0])), 
                    np.random.randint(0, len(route[1])))
             route[0][idx[0]], route[1][idx[1]] = route[1][idx[1]], route[0][idx[0]]
         elif type == 4:  # add an empty route
             solution.routes.append([])
         solution.refresh()
-        return 1
+        return True
 
-    def reproduce(self, death_rate):
+    def reproduce(self):
         old_pool = self.pool.copy()
         for parent in old_pool:
             if not parent.life:
@@ -370,9 +372,12 @@ class Population():
             for _ in range(2):
                 child = parent.copy()
                 t = np.random.randint(1, 3)
+                flag = False
                 for _ in range(t):
-                    self.mutate(child, np.random.randint(0, MUTATION_TYPE))
-                if child.cost == INT_MAX and np.random.rand() < death_rate:
+                    flag |= self.mutate(child, np.random.randint(0, MUTATION_TYPE))
+                # if not flag:
+                #     self.mutate(child, np.random.randint(0, MUTATION_TYPE))
+                if child.cost == INT_MAX and np.random.rand() < self.death_rate:
                     continue
                 child.refresh()
                 if child.cost < self.best.cost:
@@ -384,69 +389,80 @@ class Population():
         if len(self.pool) < self.K:
             return
         self.pool.sort()
-        self.pool = self.pool[:28]
+        self.pool = self.pool[:self.size]
     
-p = Population(4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2))
 
 # single-thread
+p = Population(4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2), 0.12, 28)
 while termination-(runtime()) > TIME_BUFFER:
-    p.reproduce(0.12)
+    p.reproduce()
     p.selection()
+
+# for solution in p.pool:
+#     print(solution)
 
 if p.best.cost < best.cost:
     best = p.best
 
 # muti-thread
-thread_pool = [init_pool[0:2],
-               init_pool[2:3],
-               init_pool[3:5],
-               init_pool[5:8],
-               init_pool[8:10],
-               init_pool[10:12],
-               init_pool[12:14],
-               init_pool[14:16]]
-thread_rates = [(0.75, 0.8, 0.7, 0.6, 0.2),
-                (0.75, 0.8, 0.7, 0.6, 0.2),
-                (0.75, 0.8, 0.7, 0.6, 0.2),
-                (0.75, 0.8, 0.7, 0.6, 0.2),
-                (0.75, 0.8, 0.7, 0.6, 0.2),
-                (0.75, 0.8, 0.7, 0.6, 0.2),
-                (0.75, 0.8, 0.7, 0.6, 0.2),
-                (0.75, 0.8, 0.7, 0.6, 0.2)]
-thread_death_rate = [0.12,
-                     0.12,
-                     0.12,
-                     0.12,
-                     0.12,
-                     0.12,
-                     0.12,
-                     0.49]
-thread_K = [4096,
-            4096,
-            4096,
-            4096,
-            4096,
-            4096,
-            4096,
-            4096]
-class MyThread(threading.Thread):
-    def __init__(self, K, pool, rates, death_rate, micro=1):
-        threading.Thread.__init__(self)
-        self.death_rate = death_rate
-        self.population = Population(K, pool, rates, micro)
+# thread_K = [2048,
+#             2048,
+#             2048,
+#             2048,
+#             2048,
+#             2048,
+#             4096,
+#             4096]
+# thread_pool = [init_pool[0:2],
+#                init_pool[2:3],
+#                init_pool[3:5],
+#                init_pool[5:8],
+#                init_pool[8:10],
+#                init_pool[10:12],
+#                init_pool[12:14],
+#                init_pool[14:16]]
+# thread_rates = [(0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2)]
+# thread_death_rate = [0.12,
+#                      0.12,
+#                      0.12,
+#                      0.12,
+#                      0.12,
+#                      0.12,
+#                      0.12,
+#                      0.49]
+# thread_size = [36,
+#                36,
+#                36,
+#                36,
+#                36,
+#                36,
+#                36,
+#                36]
+# class MyThread(threading.Thread):
+#     def __init__(self, K, pool, rates, death_rate, size, micro=1):
+#         threading.Thread.__init__(self)
+#         self.population = Population(K, pool, rates, death_rate, size, micro)
         
-    def run(self):
-        while termination-(runtime()) > TIME_BUFFER:
-            self.population.reproduce(self.death_rate)
-            self.population.selection()
+#     def run(self):
+#         while termination-(runtime()) > TIME_BUFFER:
+#             self.population.reproduce()
+#             self.population.selection()
             
-threads = []
-for i in range(8):
-    threads.append(MyThread(thread_K[i],
-                            thread_pool[i],
-                            thread_rates[i],
-                            thread_death_rate[i]))
-    threads[i].start()
+# threads = []
+# for i in range(8):
+#     threads.append(MyThread(thread_K[i],
+#                             thread_pool[i],
+#                             thread_rates[i],
+#                             thread_death_rate[i],
+#                             thread_size[i]))
+#     threads[i].start()
 
 # for t in threads:
 #     t.join()
@@ -456,4 +472,4 @@ for i in range(8):
         
 print(best)
 
-print(runtime())
+# print(runtime())
