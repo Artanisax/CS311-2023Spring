@@ -276,7 +276,6 @@ def path_scan(rule):
 
 best = Solution()
 init_pool = []
-
 for rule in range(16):
     solution = path_scan(rule)
     init_pool.append(solution)
@@ -392,91 +391,85 @@ class Population():
         self.pool.sort()
         self.pool = self.pool[:self.size]
     
-threads = []
+
 # single-thread
-def single():
-    p = Population(4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2), 0.12, 28)
-    while termination-(runtime()) > TIME_BUFFER:
-        p.reproduce()
-        p.selection()
-        
-    # for solution in p.pool:
-    #     print(solution)
-    
-    return p.best
+p = Population(4096, init_pool, (0.75, 0.8, 0.7, 0.6, 0.2), 0.12, 28)
+while termination-(runtime()) > TIME_BUFFER:
+    p.reproduce()
+    p.selection()
+
+# for solution in p.pool:
+#     print(solution)
+
+if p.best.cost < best.cost:
+    best = p.best
 
 # muti-thread
-class MyThread(threading.Thread):
-    def __init__(self, K, pool, rates, death_rate, size, micro=1):
-        threading.Thread.__init__(self)
-        self.population = Population(K, pool, rates, death_rate, size, micro)
+# thread_K = [2048,
+#             2048,
+#             2048,
+#             2048,
+#             2048,
+#             2048,
+#             4096,
+#             4096]
+# thread_pool = [init_pool[0:2],
+#                init_pool[2:3],
+#                init_pool[3:5],
+#                init_pool[5:8],
+#                init_pool[8:10],
+#                init_pool[10:12],
+#                init_pool[12:14],
+#                init_pool[14:16]]
+# thread_rates = [(0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2),
+#                 (0.75, 0.8, 0.7, 0.6, 0.2)]
+# thread_death_rate = [0.12,
+#                      0.12,
+#                      0.12,
+#                      0.12,
+#                      0.12,
+#                      0.12,
+#                      0.12,
+#                      0.49]
+# thread_size = [36,
+#                36,
+#                36,
+#                36,
+#                36,
+#                36,
+#                36,
+#                36]
+# class MyThread(threading.Thread):
+#     def __init__(self, K, pool, rates, death_rate, size, micro=1):
+#         threading.Thread.__init__(self)
+#         self.population = Population(K, pool, rates, death_rate, size, micro)
         
-    def run(self):
-        while termination-(runtime()) > TIME_BUFFER:
-            self.population.reproduce()
-            self.population.selection()
+#     def run(self):
+#         while termination-(runtime()) > TIME_BUFFER:
+#             self.population.reproduce()
+#             self.population.selection()
+            
+# threads = []
+# for i in range(8):
+#     threads.append(MyThread(thread_K[i],
+#                             thread_pool[i],
+#                             thread_rates[i],
+#                             thread_death_rate[i],
+#                             thread_size[i]))
+#     threads[i].start()
 
-def multi():
-    thread_K = [4096,
-                2048,
-                2048,
-                2048,
-                2048,
-                2048,
-                4096,
-                4096]
-    thread_pool = [init_pool,
-                init_pool[0:3],
-                init_pool[3:5],
-                init_pool[5:8],
-                init_pool[8:10],
-                init_pool[10:12],
-                init_pool[12:14],
-                init_pool[14:16]]
-    thread_rates = [(0.75, 0.8, 0.7, 0.6, 0.2),
-                    (0.75, 0.8, 0.7, 0.6, 0.2),
-                    (0.75, 0.8, 0.7, 0.6, 0.2),
-                    (0.75, 0.8, 0.7, 0.6, 0.2),
-                    (0.75, 0.8, 0.7, 0.6, 0.2),
-                    (0.75, 0.8, 0.7, 0.6, 0.2),
-                    (0.75, 0.8, 0.7, 0.6, 0.2),
-                    (0.75, 0.8, 0.7, 0.6, 0.2)]
-    thread_death_rate = [0.12,
-                        0.12,
-                        0.12,
-                        0.12,
-                        0.12,
-                        0.12,
-                        0.12,
-                        0.49]
-    thread_size = [28,
-                36,
-                36,
-                36,
-                36,
-                36,
-                36,
-                36]
-    for i in range(8):
-        threads.append(MyThread(thread_K[i],
-                                thread_pool[i],
-                                thread_rates[i],
-                                thread_death_rate[i],
-                                thread_size[i]))
-        threads[i].start()
-
-    best = Solution()
-    for t in threads:
-        t.join()
-        t_best = t.population.best
-        if t_best.cost < best.cost:
-            best = t_best  
-    return best
-
-ga_best = multi()
-if ga_best.cost < best.cost:
-    best = ga_best
-
+# for t in threads:
+#     t.join()
+#     t_best = t.population.best
+#     if t_best.cost < best.cost:
+#         best = t_best
+        
 print(best)
 
 # print(runtime())
