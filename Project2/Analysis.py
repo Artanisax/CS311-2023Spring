@@ -3,6 +3,7 @@ import time
 import queue
 import random
 import multiprocessing
+import matplotlib.pyplot as plt
 
 import numpy as np
 
@@ -77,6 +78,7 @@ class Population:
         self.size= size
         self.micro = micro
         self.best = Solution(info)
+        self.data = []
     
     def restart(self):
         self.pool = self.backup
@@ -157,14 +159,25 @@ class Population:
         random.shuffle(old_pool)
         new_pool.extend(old_pool[:int(self.size/3)])
         self.pool = new_pool
+        self.record()
+
+    def record(self):
+        rec = []
+        for solution in self.pool:
+            if solution.cost == INT_MAX:
+                rec.append(-1)
+            else:
+                rec.append(solution.cost)
+        self.data.append(rec)
 
 # muti-process
 class MyProcess(multiprocessing.Process):
-    def __init__(self, info, K, pool, rates, death_rate, size, q, micro=1):
+    def __init__(self, info, K, pool, rates, death_rate, size, q, rkd, micro=1):
         super(MyProcess, self).__init__()
         self.info = info
         self.population = Population(info, K, pool, rates, death_rate, size, micro)
         self.q = q
+        self.rkd = rkd
         
     def run(self):
         random.seed(self.info.seed)
@@ -174,21 +187,23 @@ class MyProcess(multiprocessing.Process):
         while self.info.termination-(time.time()-self.info.start_time) > TIME_BUFFER:
             self.population.reproduce()
             self.population.selection()
-            # self.population.micro *= 0.99
+            self.population.micro *= 0.99
             
-            cnt += 1
-            # if time.time()-self.info.start_time >= flag:
-            #     num = 0
-            #     for solution in self.population.pool:
-            #         if solution.cost == self.population.best.cost:
-            #             num += 1
-            #     print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
-            #     flag += 5
+        #     cnt += 1
+        #     if time.time()-self.info.start_time >= flag:
+        #         num = 0
+        #         for solution in self.population.pool:
+        #             if solution.cost == self.population.best.cost:
+        #                 num += 1
+        #         print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
+        #         flag += 5
         # num = 0
         # for solution in self.population.pool:
         #     if solution.cost == self.population.best.cost:
         #         num += 1
-        # print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
+        # print('ed:', self.name, cnt, self.population.best.cost, self.population.micro,num/len(self.population.pool))
+        
+        self.rkd.put(self.population.data)
         self.q.put(self.population.best)
 
 if __name__ == '__main__':
@@ -367,10 +382,10 @@ if __name__ == '__main__':
             else:
                 ret = get_next(last, allowance, rest, 0, cost)
         elif rule == 15:
-            if allowance > capacity/5:
-                ret = get_next(last, allowance, rest, 1, cost)
+            if allowance < capacity/6 or allowance > capacity/3:
+                ret = get_next(last, allowance, rest, 5, cost)
             else:
-                ret = get_next(last, allowance, rest, 0, cost)
+                ret = get_next(last, allowance, rest, 1, cost)
         return ret
 
     def path_scan(rule):
@@ -406,11 +421,11 @@ if __name__ == '__main__':
     
     CORE = 8
     
-    proc_K = [777,
-              777,
-              777,
-              777,
+    proc_K = [666,
+              888,
+              555,
               666,
+              777,
               777,
               555,
               999]
@@ -420,7 +435,7 @@ if __name__ == '__main__':
                  init_pool[5:16],
                  init_pool[2:5],
                  init_pool[2:5],
-                 init_pool[2:9],
+                 init_pool[13:16],
                  init_pool]
     proc_rates = [(0.86, 0.8, 0.85, 0.9, 0.05),
                   (0.8, 0.9, 0.75, 0.65, 0.05),
@@ -435,7 +450,7 @@ if __name__ == '__main__':
                        0.92,
                        0.93,
                        0.94,
-                       0.9,
+                       0.91,
                        0.96,
                        0.86]
     proc_size = [61,
@@ -447,6 +462,7 @@ if __name__ == '__main__':
                  37,
                  49]
     q = multiprocessing.Manager().Queue()
+    rkd = multiprocessing.Manager().Queue()
     processes = []
     for i in range(CORE):
         processes.append(MyProcess(info,
@@ -455,7 +471,8 @@ if __name__ == '__main__':
                                    proc_rates[i],
                                    proc_death_rate[i],
                                    proc_size[i],
-                                   q
+                                   q,
+                                   rkd
                                    ))
         processes[i].start()
     
@@ -465,7 +482,7 @@ if __name__ == '__main__':
         solution = q.get()
         if solution.cost < best.cost:
             best = solution
-            
+    
     # single-process
     # p = Population(info, 4096, init_pool, (0.7, 0.9, 0.75, 0.7, 0.15), 0.12, 28)
     # while termination-(time.time()-start_time) > TIME_BUFFER:
@@ -477,3 +494,12 @@ if __name__ == '__main__':
     print(best)
 
     # print(time.time()-start_time)
+
+    for i in range(CORE):
+        data = rkd.get()
+        for j in range(len(data)):
+            if j%5:
+                continue
+            plt.hist(data[j])
+            plt.savefig('pic/'+str(i)+'-'+str(j))
+            plt.close()

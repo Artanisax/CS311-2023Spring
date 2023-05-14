@@ -148,7 +148,7 @@ class Population:
             #     new_pool.append(parent)
             
     def selection(self):
-        if len(self.pool) < self.K:
+        if len(self.pool) <= self.K:
             return
         old_pool = self.pool
         old_pool.sort()
@@ -174,21 +174,21 @@ class MyProcess(multiprocessing.Process):
         while self.info.termination-(time.time()-self.info.start_time) > TIME_BUFFER:
             self.population.reproduce()
             self.population.selection()
-            # self.population.micro *= 0.99
+            self.population.micro *= 0.99
             
-            cnt += 1
-            # if time.time()-self.info.start_time >= flag:
-            #     num = 0
-            #     for solution in self.population.pool:
-            #         if solution.cost == self.population.best.cost:
-            #             num += 1
-            #     print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
-            #     flag += 5
-        num = 0
-        for solution in self.population.pool:
-            if solution.cost == self.population.best.cost:
-                num += 1
-        print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
+        #     cnt += 1
+        #     if time.time()-self.info.start_time >= flag:
+        #         num = 0
+        #         for solution in self.population.pool:
+        #             if solution.cost == self.population.best.cost:
+        #                 num += 1
+        #         print(self.name, cnt, self.population.best.cost, num/len(self.population.pool))
+        #         flag += 5
+        # num = 0
+        # for solution in self.population.pool:
+        #     if solution.cost == self.population.best.cost:
+        #         num += 1
+        # print('ed:', self.name, cnt, self.population.best.cost, self.population.micro,num/len(self.population.pool))
         self.q.put(self.population.best)
 
 if __name__ == '__main__':
@@ -357,32 +357,20 @@ if __name__ == '__main__':
             else:
                 ret = get_next(last, allowance, rest, 11, cost)
         elif rule == 13:
-            if allowance > capacity/4:
-                ret = get_next(last, allowance, rest, 10, cost)
+            if allowance > capacity/3:
+                ret = get_next(last, allowance, rest, 1, cost)
             else:
-                ret = get_next(last, allowance, rest, 11, cost)
+                ret = get_next(last, allowance, rest, 0, cost)
         elif rule == 14:
-            for id in rest:
-                e = requirements[id]
-                if e[3] > allowance:
-                    continue
-                u, v = e[0:2]
-                if dist[last][v] < dist[last][u]:
-                    u, v = v, u
-                if not ret or e[3] < requirements[ret[2]][3] \
-                or (e[3] == requirements[ret[2]][3] and dist[last][u] < dist[last][ret[0]]):
-                    ret = (u, v, id)
+            if allowance > capacity/4:
+                ret = get_next(last, allowance, rest, 1, cost)
+            else:
+                ret = get_next(last, allowance, rest, 0, cost)
         elif rule == 15:
-            for id in rest:
-                e = requirements[id]
-                if e[3] > allowance:
-                    continue
-                u, v = e[0:2]
-                if dist[last][v] < dist[last][u]:
-                    u, v = v, u
-                if not ret or e[3] > requirements[ret[2]][3] \
-                or (e[3] == requirements[ret[2]][3] and dist[last][u] < dist[last][ret[0]]):
-                    ret = (u, v, id)
+            if allowance < capacity/6 or allowance > capacity/3:
+                ret = get_next(last, allowance, rest, 5, cost)
+            else:
+                ret = get_next(last, allowance, rest, 1, cost)
         return ret
 
     def path_scan(rule):
@@ -418,13 +406,13 @@ if __name__ == '__main__':
     
     CORE = 8
     
-    proc_K = [888,
+    proc_K = [666,
+              888,
+              555,
               666,
-              888,
-              888,
-              888,
-              888,
-              888,
+              777,
+              777,
+              555,
               999]
     proc_pool = [init_pool,
                  init_pool,
@@ -432,7 +420,7 @@ if __name__ == '__main__':
                  init_pool[5:16],
                  init_pool[2:5],
                  init_pool[2:5],
-                 init_pool[2:9],
+                 init_pool[13:16],
                  init_pool]
     proc_rates = [(0.86, 0.8, 0.85, 0.9, 0.05),
                   (0.8, 0.9, 0.75, 0.65, 0.05),
@@ -447,7 +435,7 @@ if __name__ == '__main__':
                        0.92,
                        0.93,
                        0.94,
-                       0.9,
+                       0.91,
                        0.96,
                        0.86]
     proc_size = [61,
