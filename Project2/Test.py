@@ -4,7 +4,7 @@ import time
 solver = 'Analysis.py'
 data = 'egl-s1-A.dat'
 termination = 120
-seed = 114514
+seed = 2333
 
 solution = subprocess.run(['python', solver, data, '-t', str(termination), '-s', str(seed)])
 

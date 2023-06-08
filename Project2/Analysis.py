@@ -162,13 +162,7 @@ class Population:
         self.record()
 
     def record(self):
-        rec = []
-        for solution in self.pool:
-            if solution.cost == INT_MAX:
-                rec.append(-1)
-            else:
-                rec.append(solution.cost)
-        self.data.append(rec)
+        self.data.append(self.best.cost)
 
 # muti-process
 class MyProcess(multiprocessing.Process):
@@ -497,9 +491,6 @@ if __name__ == '__main__':
 
     for i in range(CORE):
         data = rkd.get()
-        for j in range(len(data)):
-            if j%5:
-                continue
-            plt.hist(data[j])
-            plt.savefig('pic/'+str(i)+'-'+str(j))
-            plt.close()
+        plt.plot(data)
+        plt.savefig('pic/'+str(i))
+        plt.close()
