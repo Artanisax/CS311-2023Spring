@@ -8,6 +8,7 @@ from typing import Any
 
 TIME_BUFFER = 2.33
 INT_MAX = (2**31)-1
+CORE = 8
 
 class Info():
     def __init__(self, arg: list[str]) -> None:
@@ -98,17 +99,42 @@ class Solution():
                 u = e[1]
             self.cost += self.info.dis[u][self.info.s]
 
-    def mutate() -> None:
+    def mutate(self) -> None:
+        # flip, swap, cross, split, merge
         return NotImplementedError
 
 class Population():
-    def __init__(self, info) -> None:
-        pass
+    def __init__(self, info: Info, hyper: tuple, pool: list[Solution]) -> None:
+        return NotImplementedError
+    
+    def reproduce(self):
+        return NotImplementedError
+
+    def select(self):
+        return NotImplementedError
 
 class MyProcess(multiprocessing.Process):
-    def __init__(self, info: Info, hyper: list) -> None:
-        self.info = info
+    def __init__(self, info: Info, hyper: tuple, pool: list[Solution]) -> None:
+        super(MyProcess, self).__init__()
+        self.population = Population(info, hyper, pool)
+
 
 if __name__ == '__main__':
     info = Info(sys.argv)
     
+    '''
+    To Be Implemented
+    '''
+    
+    q = multiprocessing.Manager().Queue()
+    process = []
+    for i in range(CORE):
+        process.append(MyProcess(info, hyper[i], pool[i]))
+        process[i].start()
+    for proc in process:
+        proc.join()
+    while not q.empty():
+        sol = q.get()
+        if sol.cost < best.cost:
+            best = sol
+    print(best)

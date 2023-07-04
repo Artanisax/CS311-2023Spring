@@ -1,9 +1,9 @@
 import subprocess
 import time
 
-solver = 'Analysis.py'
+solver = 'CARP_solver.py'
 data = 'egl-s1-A.dat'
-termination = 120
+termination = 20
 seed = 2333
 
 solution = subprocess.run(['python', solver, data, '-t', str(termination), '-s', str(seed)])
