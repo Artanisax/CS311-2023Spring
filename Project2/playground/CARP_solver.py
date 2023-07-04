@@ -8,7 +8,7 @@ from typing import Any
 
 TIME_BUFFER = 2.33
 INT_MAX = (2**31)-1
-CORE = 8
+CORE = 1 # 8
 
 class Info():
     def __init__(self, arg: list[str]) -> None:
@@ -57,6 +57,9 @@ class Info():
                         dis[s][v] = dis[s][u]+w
                         q.put((dis[s][v], v))
         
+        self.start_time = start_time
+        self.termination = termination
+        self.seed = seed
         self.n = n
         self.s = s
         self.k = k
@@ -65,10 +68,11 @@ class Info():
         self.req = req
         
 class Solution():
-    def __init__(self, info: Info, routes: list[tuple]) -> None:
-        self.info = info
+    def __init__(self, info: Info, routes: list[tuple]=[]) -> None:
+        # self.info = info
         self.routes = routes
-        self.refresh()
+        self.cost = INT_MAX
+        return NotImplementedError
     
     def __lt__(self, another) -> bool:
         return self.cost < another.cost
@@ -105,6 +109,7 @@ class Solution():
 
 class Population():
     def __init__(self, info: Info, hyper: tuple, pool: list[Solution]) -> None:
+        self.best = Solution(info)
         return NotImplementedError
     
     def reproduce(self):
@@ -114,10 +119,20 @@ class Population():
         return NotImplementedError
 
 class MyProcess(multiprocessing.Process):
-    def __init__(self, info: Info, hyper: tuple, pool: list[Solution]) -> None:
+    def __init__(self, info: Info, hyper: tuple, pool: list[Solution], q: queue.Queue) -> None:
         super(MyProcess, self).__init__()
+        self.start_time = info.start_time
+        self.termination = info.termination
+        self.seed = info.seed
         self.population = Population(info, hyper, pool)
-
+        self.q = q
+        
+    def run(self) -> None:
+        random.seed(self.info.seed)
+        while self.termination-(time.time()-self.start_time) > TIME_BUFFER:
+            self.population.reproduce()
+            self.population.select()
+        q.put(self.population.best)
 
 if __name__ == '__main__':
     info = Info(sys.argv)
@@ -125,6 +140,8 @@ if __name__ == '__main__':
     '''
     To Be Implemented
     '''
+    hyper = []
+    pool = []
     
     q = multiprocessing.Manager().Queue()
     process = []
